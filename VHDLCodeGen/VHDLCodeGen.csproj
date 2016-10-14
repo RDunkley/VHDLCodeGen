@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{1962E20B-D761-4C6F-A0A4-C20D0BC62E2C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>VHDLCodeGen</RootNamespace>
+    <AssemblyName>VHDLCodeGen</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AliasInfo.cs" />
+    <Compile Include="ArchitecturalType.cs" />
+    <Compile Include="AttributeDeclarationInfo.cs" />
+    <Compile Include="AttributeSpecificationInfo.cs" />
+    <Compile Include="BaseTypeInfo.cs" />
+    <Compile Include="ComponentInfo.cs" />
+    <Compile Include="DeclarationInfo.cs" />
+    <Compile Include="DeclarationType.cs" />
+    <Compile Include="DefaultValues.cs" />
+    <Compile Include="DocumentationHelper.cs" />
+    <Compile Include="EntityInfo.cs" />
+    <Compile Include="FunctionInfo.cs" />
+    <Compile Include="GenerateInfo.cs" />
+    <Compile Include="GenericInfo.cs" />
+    <Compile Include="ModuleInfo.cs" />
+    <Compile Include="ParameterInfo.cs" />
+    <Compile Include="PortInfo.cs" />
+    <Compile Include="PortDirection.cs" />
+    <Compile Include="ProcedureInfo.cs" />
+    <Compile Include="ProcedureParameterInfo.cs" />
+    <Compile Include="ProcedureParameterType.cs" />
+    <Compile Include="ProcessInfo.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SignalInfo.cs" />
+    <Compile Include="SimplifiedGenericInfo.cs" />
+    <Compile Include="SimplifiedPortInfo.cs" />
+    <Compile Include="SubModule.cs" />
+    <Compile Include="VariableInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
