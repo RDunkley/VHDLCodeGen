@@ -11,6 +11,8 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and
 // limitations under the License.
 //********************************************************************************************************************************
+using System;
+
 namespace VHDLCodeGen
 {
 	/// <summary>
@@ -49,6 +51,19 @@ namespace VHDLCodeGen
 		{
 			Direction = direction;
 			ParameterType = parameterType;
+		}
+
+		/// <summary>
+		///   Gets the function parameter string representing this parameter.
+		/// </summary>
+		/// <returns>String representing the parameter.</returns>
+		public override string GetSignatureString()
+		{
+			string typeString = string.Empty;
+			if(ParameterType.HasValue)
+				typeString = string.Format("{0} ", Enum.GetName(typeof(ProcedureParameterType), ParameterType.Value).ToLower());
+
+			return string.Format("{0}{1} : {2} {3}", typeString, Name, Enum.GetName(typeof(PortDirection), Direction).ToLower(), Type);
 		}
 
 		#endregion Methods

@@ -11,7 +11,9 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and
 // limitations under the License.
 //********************************************************************************************************************************
+using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace VHDLCodeGen
 {
@@ -49,6 +51,63 @@ namespace VHDLCodeGen
 		{
 			Generics = new List<GenericInfo>();
 			Ports = new List<PortInfo>();
+		}
+
+		/// <summary>
+		///   Writes the entity to a stream.
+		/// </summary>
+		/// <param name="wr"><see cref="StreamWriter"/> object to write the entity to.</param>
+		/// <param name="indentOffset">Number of indents to add before any documentation begins.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="wr"/> is a null reference.</exception>
+		/// <exception cref="InvalidOperationException">The number of ports and generics is zero.</exception>
+		/// <exception cref="IOException">An error occurred while writing to the <see cref="StreamWriter"/> object.</exception>
+		public override void Write(StreamWriter wr, int indentOffset)
+		{
+			if (wr == null)
+				throw new ArgumentNullException("wr");
+
+			if (indentOffset < 0)
+				indentOffset = 0;
+
+			if (Generics.Count == 0 && Ports.Count == 0)
+				throw new InvalidOperationException(string.Format("An attempt was made to write an entity ({0}), but the entity does not have any ports or generics.", Name));
+
+			// Generate the documentation lookup table.
+			Dictionary<string, string[]> lookup = new Dictionary<string, string[]>();
+			lookup.Add("Summary", new string[] { Summary });
+
+			if (Generics.Count > 0)
+			{
+				List<string> subItems = new List<string>(Generics.Count);
+				foreach (GenericInfo info in Generics)
+					subItems.Add(info.GetDocumentationString());
+				lookup.Add("Generics", subItems.ToArray());
+			}
+
+			if(Ports.Count > 0)
+			{
+				List<string> subItems = new List<string>(Ports.Count);
+				foreach (PortInfo info in Ports)
+					subItems.Add(info.GetDocumentationString());
+				lookup.Add("Ports", subItems.ToArray());
+			}
+
+			if (!string.IsNullOrWhiteSpace(Remarks))
+				lookup.Add("Remarks", new string[] { Remarks });
+
+			// Write the header.
+			DocumentationHelper.WriteFlowerLine(wr, indentOffset);
+			DocumentationHelper.WriteGeneralDocumentationElements(wr, lookup, indentOffset);
+			DocumentationHelper.WriteFlowerLine(wr, indentOffset);
+			DocumentationHelper.WriteLine(wr, string.Format("entity {0} is", Name), indentOffset);
+
+			if (Generics.Count > 0)
+				SimplifiedGenericInfo.WriteGenericDeclaration(wr, Generics.ToArray(), indentOffset);
+
+			if (Ports.Count > 0)
+				SimplifiedPortInfo.WritePortDeclaration(wr, Ports.ToArray(), indentOffset);
+			
+			DocumentationHelper.WriteLine(wr, string.Format("end {0};", Name), indentOffset);
 		}
 
 		#endregion Methods

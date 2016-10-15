@@ -13,6 +13,7 @@
 //********************************************************************************************************************************
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace VHDLCodeGen
 {
@@ -26,6 +27,15 @@ namespace VHDLCodeGen
 	/// </remarks>
 	public class ModuleInfo
 	{
+		#region Fields
+
+		/// <summary>
+		///   Tracks the usings associated with the module.
+		/// </summary>
+		private List<string> mUsingList = new List<string>();
+
+		#endregion Fields
+
 		#region Properties
 
 		/// <summary>
@@ -89,9 +99,15 @@ namespace VHDLCodeGen
 		public ArchitecturalType Type { get; protected set; }
 
 		/// <summary>
-		///   List of use statements in the module (example: 'IEEE.STD_LOGIC_1164.all'). Can be empty.
+		///   Array of use statements in the module (example: 'IEEE.STD_LOGIC_1164.all'). Can be empty.
 		/// </summary>
-		public List<string> Usings { get; private set; }
+		public string[] Usings
+		{
+			get
+			{
+				return mUsingList.ToArray();
+			}
+		}
 
 		#endregion Properties
 
@@ -120,8 +136,199 @@ namespace VHDLCodeGen
 			Processes = new List<ProcessInfo>();
 			Generates = new List<GenerateInfo>();
 			SubModules = new List<SubModule>();
-			Usings = new List<string>();
 			ConcurrentStatements = new List<string>();
+
+			// Add the default usings.
+			AddUsing("IEEE.STD_LOGIC_1164.all");
+			AddUsing("IEEE.NUMERIC_STD.all");
+		}
+
+		/// <summary>
+		///   Validates that all the child names are unique.
+		/// </summary>
+		/// <exception cref="InvalidOperationException">Two child objects were found with the same name.</exception>
+		private void ValidateChildNames()
+		{
+			List<BaseTypeInfo> childList = new List<BaseTypeInfo>();
+			childList.AddRange(DeclaredTypes);
+			childList.AddRange(Functions);
+			childList.AddRange(Procedures);
+			childList.AddRange(GetUniqueComponents());
+			childList.AddRange(Signals);
+			childList.AddRange(Aliases);
+			childList.AddRange(GetUniqueAttributeDeclarations());
+			childList.AddRange(Processes);
+			childList.AddRange(Generates);
+			childList.AddRange(SubModules);
+
+			BaseTypeInfo.ValidateNoDuplicates(childList.ToArray(), Entity.Name, "module");
+		}
+
+		/// <summary>
+		///   Gets all the unique declarations contained in the attribute specifications.
+		/// </summary>
+		/// <returns>Array of unique declarations.</returns>
+		private AttributeDeclarationInfo[] GetUniqueAttributeDeclarations()
+		{
+			List<AttributeDeclarationInfo> declarations = new List<AttributeDeclarationInfo>();
+			foreach (AttributeSpecificationInfo spec in Attributes)
+			{
+				if (!declarations.Contains(spec.Declaration))
+					declarations.Add(spec.Declaration);
+			}
+			return declarations.ToArray();
+		}
+
+		/// <summary>
+		///   Gets all the unique components contained in the sub-modules.
+		/// </summary>
+		/// <returns>Array of unique components.</returns>
+		private ComponentInfo[] GetUniqueComponents()
+		{
+			List<ComponentInfo> components = new List<ComponentInfo>();
+			foreach(SubModule mod in SubModules)
+			{
+				if (!components.Contains(mod.Component))
+					components.Add(mod.Component);
+			}
+			return components.ToArray();
+		}
+
+		/// <summary>
+		///   Writes the module to a stream.
+		/// </summary>
+		/// <param name="wr"><see cref="StreamWriter"/> object to write the entity to.</param>
+		/// <param name="indentOffset">Number of indents to add before any documentation begins.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="wr"/> is a null reference.</exception>
+		/// <exception cref="InvalidOperationException">Unable to write the object out in its current state.</exception>
+		/// <exception cref="IOException">An error occurred while writing to the <see cref="StreamWriter"/> object.</exception>
+		public void Write(StreamWriter wr, int indentOffset)
+		{
+			if (wr == null)
+				throw new ArgumentNullException("wr");
+
+			if (indentOffset < 0)
+				indentOffset = 0;
+
+			ValidateChildNames();
+
+			// Write the entity.
+			Entity.Write(wr, indentOffset);
+
+			DocumentationHelper.WriteLine(wr);
+			DocumentationHelper.WriteLine(wr, string.Format("architecture {0} of {1} is", Enum.GetName(typeof(ArchitecturalType), Type), Entity.Name), indentOffset);
+			DocumentationHelper.WriteLine(wr);
+
+			// Types and Constants
+			DeclarationInfo.WriteDeclarations(wr, DeclaredTypes.ToArray(), indentOffset, Entity.Name, "module");
+			if(DeclaredTypes.Count > 0)
+				DocumentationHelper.WriteLine(wr);
+
+			// Functions
+			BaseTypeInfo.WriteBaseTypeInfos("Functions", wr, Functions.ToArray(), indentOffset, Entity.Name, "module");
+			if (Functions.Count > 0)
+				DocumentationHelper.WriteLine(wr);
+
+			// Procedures
+			BaseTypeInfo.WriteBaseTypeInfos("Procedures", wr, Procedures.ToArray(), indentOffset, Entity.Name, "module");
+			if (Procedures.Count > 0)
+				DocumentationHelper.WriteLine(wr);
+
+			// Components
+			ComponentInfo[] components = GetUniqueComponents();
+			BaseTypeInfo.WriteBaseTypeInfos("Components", wr, components, indentOffset, Entity.Name, "module");
+			if (components.Length > 0)
+				DocumentationHelper.WriteLine(wr);
+
+			// Signals
+			BaseTypeInfo.WriteBaseTypeInfos("Signals", wr, Signals.ToArray(), indentOffset, Entity.Name, "module");
+			if (Signals.Count > 0)
+				DocumentationHelper.WriteLine(wr);
+
+			// Aliases
+			BaseTypeInfo.WriteBaseTypeInfos("Aliases", wr, Aliases.ToArray(), indentOffset, Entity.Name, "module");
+			if (Aliases.Count > 0)
+				DocumentationHelper.WriteLine(wr);
+
+			// Attributes
+			AttributeSpecificationInfo.WriteAttributes(wr, Attributes.ToArray(), indentOffset, Entity.Name, "module");
+			if(Attributes.Count > 0)
+				DocumentationHelper.WriteLine(wr);
+
+			DocumentationHelper.WriteLine(wr, "begin", indentOffset);
+			DocumentationHelper.WriteLine(wr);
+
+			// Concurrent Statements
+			foreach (string line in ConcurrentStatements)
+				DocumentationHelper.WriteLine(wr, line, indentOffset);
+			if(ConcurrentStatements.Count > 0)
+				DocumentationHelper.WriteLine(wr);
+
+			// Processes
+			BaseTypeInfo.WriteBaseTypeInfos("Processes", wr, Processes.ToArray(), indentOffset, Entity.Name, "module");
+			if (Processes.Count > 0)
+				DocumentationHelper.WriteLine(wr);
+
+			// Generates
+			BaseTypeInfo.WriteBaseTypeInfos("Generates", wr, Generates.ToArray(), indentOffset, Entity.Name, "module");
+			if (Generates.Count > 0)
+				DocumentationHelper.WriteLine(wr);
+
+			BaseTypeInfo.WriteBaseTypeInfos("Sub-Modules", wr, SubModules.ToArray(), indentOffset, Entity.Name, "module");
+			if (SubModules.Count > 0)
+				DocumentationHelper.WriteLine(wr);
+
+			DocumentationHelper.WriteLine(wr, string.Format("end {0};", Enum.GetName(typeof(ArchitecturalType), Type)), indentOffset);
+		}
+
+		/// <summary>
+		///   Adds a list of usings to the Usings of this <see cref="NamespaceTypeInfo"/> object.
+		/// </summary>
+		/// <param name="usings">Array of usings to be added.</param>
+		public void AddUsings(string[] usings)
+		{
+			// Add any usings that are not duplicates.
+			foreach (string usingString in usings)
+			{
+				if (!mUsingList.Contains(usingString))
+					mUsingList.Add(usingString);
+			}
+
+			// Sort the using list.
+			if (mUsingList.Count > 0)
+				mUsingList.Sort();
+		}
+
+		/// <summary>
+		///   Add an additonal using to the Usings of this <see cref="NamespaceTypeInfo"/> object.
+		/// </summary>
+		/// <param name="usingString">Using string to be added.</param>
+		public void AddUsing(string usingString)
+		{
+			if (mUsingList.Contains(usingString))
+				return;
+
+			mUsingList.Add(usingString);
+
+			// Sort the using list.
+			if (mUsingList.Count > 0)
+				mUsingList.Sort();
+		}
+
+		/// <summary>
+		///   Remove the specified using from this <see cref="NamespaceTypeInfo"/> object.
+		/// </summary>
+		/// <param name="usingString">Using string to be removed.</param>
+		public void RemoveUsing(string usingString)
+		{
+			if (!mUsingList.Contains(usingString))
+				return;
+
+			mUsingList.Remove(usingString);
+
+			// Sort the using list.
+			if (mUsingList.Count > 0)
+				mUsingList.Sort();
 		}
 
 		#endregion Methods

@@ -12,6 +12,7 @@
 // limitations under the License.
 //********************************************************************************************************************************
 using System;
+using System.IO;
 
 namespace VHDLCodeGen
 {
@@ -60,6 +61,26 @@ namespace VHDLCodeGen
 
 			Type = type;
 			MappedType = mappedType;
+		}
+
+		/// <summary>
+		///   Writes the alias to a stream.
+		/// </summary>
+		/// <param name="wr"><see cref="StreamWriter"/> object to write the alias to.</param>
+		/// <param name="indentOffset">Number of indents to add before any documentation begins.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="wr"/> is a null reference.</exception>
+		/// <exception cref="IOException">An error occurred while writing to the <see cref="StreamWriter"/> object.</exception>
+		public override void Write(StreamWriter wr, int indentOffset)
+		{
+			if (wr == null)
+				throw new ArgumentNullException("wr");
+
+			if (indentOffset < 0)
+				indentOffset = 0;
+
+			// Write the header.
+			WriteBasicHeader(wr, indentOffset);
+			DocumentationHelper.WriteLine(wr, string.Format("alias {0} : {1} is {2};", Name, Type, MappedType), indentOffset);
 		}
 
 		#endregion Methods

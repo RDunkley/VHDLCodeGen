@@ -198,6 +198,14 @@ namespace VHDLCodeGen
 			return GenerateLeadingWhitespace(indents, out num);
 		}
 
+		public static string GenerateSpaces(int number)
+		{
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < number; i++)
+				sb.Append(" ");
+			return sb.ToString();
+		}
+
 		/// <summary>
 		///   Generates the leading whitespace based on the specified number of indents.
 		/// </summary>
@@ -410,6 +418,113 @@ namespace VHDLCodeGen
 
 			wr.WriteLine(GenerateFullFlowerLine(indentOffset));
 			return true;
+		}
+
+		/// <summary>
+		///   Creates a generalized documentation section.
+		/// </summary>
+		/// <param name="wr"><see cref="StreamWriter"/> object to write the documentation to.</param>
+		/// <param name="documentation">Lookup table containing the section names (keys) and array of values (text in that section).</param>
+		/// <param name="indentOffset">Number of indentations, before the code/comments start.</param>
+		/// <exception cref="IOException">An error occurred while writing to the <see cref="StreamWriter"/> object.</exception>
+		public static void WriteGeneralDocumentationElements(StreamWriter wr, Dictionary<string, string[]> documentation, int indentOffset)
+		{
+			if (wr == null)
+				throw new ArgumentNullException("wr");
+			if (documentation == null)
+				throw new ArgumentNullException("documentation");
+
+			if (documentation.Count == 0)
+				return;
+
+			int maxLength = 0;
+			foreach(string key in documentation.Keys)
+			{
+				if (key.Length > maxLength)
+					maxLength = key.Length;
+			}
+
+			int wsLength;
+			string ws = GenerateLeadingWhitespace(indentOffset, out wsLength);
+			string newLine = string.Format("-- {0}  ", GenerateSpaces(maxLength));
+
+			foreach (string key in documentation.Keys)
+			{
+				string additionalKeySpace = GenerateSpaces(maxLength - key.Length);
+				if (documentation[key].Length == 1)
+				{
+					if (wsLength + newLine.Length + documentation[key][0].Length > DefaultValues.NumCharactersPerLine)
+					{
+						wr.Write(string.Format("{0}-- {1}: {2}", ws, key, additionalKeySpace));
+						AddCommentToEndOfLine(wr, documentation[key][0], newLine.Length, indentOffset, newLine);
+					}
+					else
+					{
+						// Place all on the same line as the key.
+						wr.WriteLine(string.Format("{0}-- {1}: {2}{3}", ws, key, additionalKeySpace, documentation[key][0]));
+					}
+				}
+				else
+				{
+					// Create starting line.
+					wr.WriteLine(string.Format("{0}-- {1}:", ws, key, additionalKeySpace));
+					for (int i = 0; i < documentation[key].Length; i++)
+					{
+						if (wsLength + newLine.Length + documentation[key][i].Length > DefaultValues.NumCharactersPerLine)
+						{
+							wr.Write(newLine);
+							AddCommentToEndOfLine(wr, documentation[key][i], newLine.Length, indentOffset, newLine);
+						}
+						else
+						{
+							// Place on the same line.
+							wr.WriteLine(string.Format("{0}{1}", newLine, documentation[key][i]));
+						}
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		///   Writes the region start line.
+		/// </summary>
+		/// <param name="wr"><see cref="StreamWriter"/> object to write the text to.</param>
+		/// <param name="nameOfRegion">Name of the region.</param>
+		/// <param name="indentOffset">Number of indentations to include before the text.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="wr"/> or <paramref name="nameOfRegion"/> is a null reference.</exception>
+		/// <exception cref="ArgumentException"><paramref name="nameOfRegion"/> is an empty string.</exception>
+		/// <exception cref="IOException">An error occurred while writing to the <see cref="StreamWriter"/> object.</exception>
+		public static void WriteRegionStart(StreamWriter wr, string nameOfRegion, int indentOffset)
+		{
+			if (wr == null)
+				throw new ArgumentNullException("wr");
+			if (nameOfRegion == null)
+				throw new ArgumentNullException("nameOfRegion");
+			if (nameOfRegion.Length == 0)
+				throw new ArgumentException("nameOfRegion is an empty string");
+
+			int wsLength;
+			string ws = GenerateLeadingWhitespace(indentOffset, out wsLength);
+			int middleIndex = ((DefaultValues.NumCharactersPerLine - wsLength) / 2) - 1;
+			int startIndex = middleIndex - ((nameOfRegion.Length + 2) / 2) + wsLength;
+
+			StringBuilder sb = new StringBuilder();
+			sb.Append("--"); // Start of line.
+
+			int index = wsLength + 2;
+			for (int i = index; i < startIndex; i++)
+			{
+				sb.Append(DefaultValues.FlowerBoxCharacter);
+				index++;
+			}
+
+			// Add the word with spaces on each side.
+			sb.AppendFormat(" {0} ", nameOfRegion);
+
+			for (int i = index; i < DefaultValues.NumCharactersPerLine; i++)
+				sb.Append(DefaultValues.FlowerBoxCharacter);
+
+			WriteLine(wr, sb.ToString(), indentOffset);
 		}
 
 		/// <summary>

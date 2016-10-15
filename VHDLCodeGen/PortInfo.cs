@@ -37,11 +37,12 @@ namespace VHDLCodeGen
 		/// <param name="name">Name of the port.</param>
 		/// <param name="description">Description of the port.</param>
 		/// <param name="direction">Direction of the port.</param>
-		/// <param name="bitWidth">Number of bits in the port.</param>
-		/// <exception cref="ArgumentNullException"><paramref name="name"/>, or <paramref name="description"/> is a null reference.</exception>
-		/// <exception cref="ArgumentException"><paramref name="name"/>, or <paramref name="description"/> is an empty string or <paramref name="bitWidth"/> is less than 1.</exception>
-		public PortInfo(string name, string description, PortDirection direction, int bitWidth)
-			: base(name, direction, bitWidth)
+		/// <param name="type">Type of the port.</param>
+		/// <param name="defaultValue">Default value of the port. Can be null or empty.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="name"/>, <paramref name="type"/>, or <paramref name="description"/> is a null reference.</exception>
+		/// <exception cref="ArgumentException"><paramref name="name"/>, <paramref name="type"/>, or <paramref name="description"/> is an empty string.</exception>
+		public PortInfo(string name, string description, PortDirection direction, string type, string defaultValue = null)
+			: base(name, direction, type, defaultValue)
 		{
 			if (description == null)
 				throw new ArgumentNullException("description");
@@ -49,6 +50,15 @@ namespace VHDLCodeGen
 				throw new ArgumentException("description is an empty string");
 
 			Description = description;
+		}
+
+		/// <summary>
+		///   Gets the documentation string for this port.
+		/// </summary>
+		/// <returns>String representing the documentation string.</returns>
+		public virtual string GetDocumentationString()
+		{
+			return string.Format("{0} - {1}", Name, Description);
 		}
 
 		#endregion Methods

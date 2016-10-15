@@ -13,6 +13,7 @@
 //********************************************************************************************************************************
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace VHDLCodeGen
 {
@@ -75,6 +76,103 @@ namespace VHDLCodeGen
 			Processes = new List<ProcessInfo>();
 			SubModules = new List<SubModule>();
 			Generates = new List<GenerateInfo>();
+		}
+
+		/// <summary>
+		///   Writes the process to a stream.
+		/// </summary>
+		/// <param name="wr"><see cref="StreamWriter"/> object to write the process to.</param>
+		/// <param name="indentOffset">Number of indents to add before any documentation begins.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="wr"/> is a null reference.</exception>
+		/// <exception cref="InvalidOperationException">Unable to write the object out in its current state.</exception>
+		/// <exception cref="IOException">An error occurred while writing to the <see cref="StreamWriter"/> object.</exception>
+		public override void Write(StreamWriter wr, int indentOffset)
+		{
+			if (wr == null)
+				throw new ArgumentNullException("wr");
+
+			if (indentOffset < 0)
+				indentOffset = 0;
+
+			if (ConcurrentStatements.Count == 0 && Processes.Count == 0 && SubModules.Count == 0 && Generates.Count == 0)
+				throw new InvalidOperationException(string.Format("An attempt was made to write a generate section ({0}), but the section doesn't have anything to write (processes, sub-modules, etc.).", Name));
+
+			// Validate that there are not duplicate names in the children.
+			ValidateChildNames();
+
+			// Validate that there is not an infinite loop.
+			List<GenerateInfo> parentList = new List<GenerateInfo>();
+			parentList.Add(this);
+			ValidateChildGenerates(parentList);
+
+			// Write the header.
+			WriteBasicHeader(wr, indentOffset);
+			DocumentationHelper.WriteLine(wr, string.Format("{0}:", Name), indentOffset);
+			DocumentationHelper.WriteLine(wr, string.Format("{0} generate", GenerateStatement), indentOffset);
+			indentOffset++;
+
+			// Write the code lines.
+			foreach (string line in ConcurrentStatements)
+				DocumentationHelper.WriteLine(wr, line, indentOffset);
+
+			if (ConcurrentStatements.Count > 0)
+				DocumentationHelper.WriteLine(wr);
+
+			// Write the processes.
+			BaseTypeInfo.WriteBaseTypeInfos("Processes", wr, Processes.ToArray(), indentOffset, Name, "generate");
+			if (Processes.Count > 0)
+				DocumentationHelper.WriteLine(wr);
+
+			// Write the generates.
+			BaseTypeInfo.WriteBaseTypeInfos("Generates", wr, Generates.ToArray(), indentOffset, Name, "generate");
+			if (Generates.Count > 0)
+				DocumentationHelper.WriteLine(wr);
+
+			// Write the sub-modules.
+			BaseTypeInfo.WriteBaseTypeInfos("Sub-Modules", wr, SubModules.ToArray(), indentOffset, Name, "generate");
+
+			indentOffset--;
+			DocumentationHelper.WriteLine(wr, "end generate;", indentOffset);
+		}
+
+		/// <summary>
+		///   Validates that all the child names are unique.
+		/// </summary>
+		/// <exception cref="InvalidOperationException">Two child objects were found with the same name.</exception>
+		private void ValidateChildNames()
+		{
+			List<BaseTypeInfo> childList = new List<BaseTypeInfo>(Generates.Count + Processes.Count + SubModules.Count);
+			foreach (ProcessInfo info in Processes)
+				childList.Add(info);
+			foreach (GenerateInfo info in Generates)
+				childList.Add(info);
+			foreach (SubModule info in SubModules)
+				childList.Add(info);
+
+			BaseTypeInfo.ValidateNoDuplicates(childList.ToArray(), Name, "generate");
+		}
+
+		/// <summary>
+		///   Validates that none of the posterity of this <see cref="GenerateInfo"/> object is in the list or parent objects.
+		/// </summary>
+		/// <param name="parentList">List of <see cref="GenerateInfo"/> objects to validate.</param>
+		public void ValidateChildGenerates(List<GenerateInfo> parentList)
+		{
+			// Check for infinite loops.
+			foreach(GenerateInfo info in Generates)
+			{
+				if (parentList.Contains(info))
+					throw new InvalidOperationException(string.Format("A generate object ({0}) contains itself as a child (meaning this will cause an infinite loop).", info.Name));
+
+				// Add the child as a parent.
+				parentList.Add(info);
+
+				// Check it's child.
+				info.ValidateChildGenerates(parentList);
+
+				// Remove the parent (this allows duplicates at the same level farther down and duplicates at this level are validated with another method).
+				parentList.Remove(info);
+			}
 		}
 
 		#endregion Methods

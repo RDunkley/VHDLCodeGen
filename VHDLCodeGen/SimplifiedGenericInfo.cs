@@ -12,6 +12,7 @@
 // limitations under the License.
 //********************************************************************************************************************************
 using System;
+using System.IO;
 
 namespace VHDLCodeGen
 {
@@ -63,6 +64,46 @@ namespace VHDLCodeGen
 			Name = name;
 			Type = type;
 			DefaultValue = defaultValue;
+		}
+
+		/// <summary>
+		///   Gets the declaration of the generic.
+		/// </summary>
+		/// <returns>Declaration of the generic.</returns>
+		public string GetDeclaration()
+		{
+			string defaultValueString = string.Empty;
+			if (!string.IsNullOrWhiteSpace(DefaultValue))
+				defaultValueString = string.Format(" := {0}", DefaultValue);
+
+			return string.Format("{0} : {1}{2}", Name, Type, defaultValueString);
+		}
+
+		/// <summary>
+		///   Writes the generic declaration to a stream.
+		/// </summary>
+		/// <param name="wr"><see cref="StreamWriter"/> object to write the declaration to.</param>
+		/// <param name="generics">Array of <see cref="SimplifiedGenericInfo"/> objects to write in the declaration.</param>
+		/// <param name="indentOffset">Number of indents to add before any documentation begins.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="wr"/>, or <paramref name="generics"/> is a null reference.</exception>
+		/// <exception cref="ArgumentException"><paramref name="generics"/> is an empty array.</exception>
+		/// <exception cref="IOException">An error occurred while writing to the <see cref="StreamWriter"/> object.</exception>
+		public static void WriteGenericDeclaration(StreamWriter wr, SimplifiedGenericInfo[] generics, int indentOffset)
+		{
+			if (generics == null)
+				throw new ArgumentNullException("generics");
+			if (generics.Length == 0)
+				throw new ArgumentException("generics is an empty array");
+
+			DocumentationHelper.WriteLine(wr, "generic (", indentOffset);
+			string ending = ";";
+			for (int i = 0; i < generics.Length; i++)
+			{
+				if (i == generics.Length - 1)
+					ending = string.Empty;
+				DocumentationHelper.WriteLine(wr, string.Format("{0}{1}", generics[i].GetDeclaration(), ending), indentOffset + 1);
+			}
+			DocumentationHelper.WriteLine(wr, ");", indentOffset);
 		}
 
 		#endregion Methods

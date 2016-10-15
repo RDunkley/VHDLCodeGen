@@ -12,6 +12,7 @@
 // limitations under the License.
 //********************************************************************************************************************************
 using System;
+using System.IO;
 
 namespace VHDLCodeGen
 {
@@ -49,6 +50,26 @@ namespace VHDLCodeGen
 				throw new ArgumentException("type is an empty string");
 
 			Type = type;
+		}
+
+		/// <summary>
+		///   Writes the attribute declaration to a stream.
+		/// </summary>
+		/// <param name="wr"><see cref="StreamWriter"/> object to write the attribute declaration to.</param>
+		/// <param name="indentOffset">Number of indents to add before any documentation begins.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="wr"/> is a null reference.</exception>
+		/// <exception cref="IOException">An error occurred while writing to the <see cref="StreamWriter"/> object.</exception>
+		public override void Write(StreamWriter wr, int indentOffset)
+		{
+			if (wr == null)
+				throw new ArgumentNullException("wr");
+
+			if (indentOffset < 0)
+				indentOffset = 0;
+
+			// Write the header.
+			WriteBasicHeader(wr, indentOffset);
+			DocumentationHelper.WriteLine(wr, string.Format("attribute {0} : {1};", Name, Type), indentOffset);
 		}
 
 		#endregion Methods

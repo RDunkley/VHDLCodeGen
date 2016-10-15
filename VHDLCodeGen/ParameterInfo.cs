@@ -69,6 +69,24 @@ namespace VHDLCodeGen
 			Description = description;
 		}
 
+		/// <summary>
+		///   Gets the documentation string for this parameter.
+		/// </summary>
+		/// <returns>String representing the documentation string.</returns>
+		public virtual string GetDocumentationString()
+		{
+			return string.Format("{0} - {1}", Name, Description);
+		}
+
+		/// <summary>
+		///   Gets the function parameter string representing this parameter.
+		/// </summary>
+		/// <returns>String representing the parameter.</returns>
+		public virtual string GetSignatureString()
+		{
+			return string.Format("{0} : {1}", Name, Type);
+		}
+
 		#endregion Methods
 	}
 }

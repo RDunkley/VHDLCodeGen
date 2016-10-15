@@ -13,6 +13,7 @@
 //********************************************************************************************************************************
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace VHDLCodeGen
 {
@@ -66,6 +67,117 @@ namespace VHDLCodeGen
 			PortMap = new Dictionary<SimplifiedPortInfo, string>(component.Ports.Count);
 			foreach (SimplifiedPortInfo port in component.Ports)
 				PortMap.Add(port, null);
+		}
+
+		/// <summary>
+		///   Validates that mappings have a one-to-one relationship.
+		/// </summary>
+		/// <exception cref="InvalidOperationException">The maps don't have a one-to-one relationship.</exception>
+		private void ValidateMappings()
+		{
+			if (Component.Generics.Count != GenericMap.Count)
+			{
+				throw new InvalidOperationException(string.Format
+				(
+					"The sub-module ({0}), does not have the same amount of generic maps ({1}) as the associated component's ({2}) generics ({3}).",
+					Name,
+					GenericMap.Count.ToString(),
+					Component.Name,
+					Component.Generics.Count.ToString()
+				));
+			}
+
+			foreach(SimplifiedGenericInfo info in Component.Generics)
+			{
+				if (!GenericMap.ContainsKey(info))
+				{
+					throw new InvalidOperationException(string.Format
+					(
+						"The sub-module ({0}), does not have a mapping for a generic ({1}) in the associated component ({2}).",
+						Name,
+						info.Name,
+						Component.Name
+					));
+				}
+			}
+
+			if (Component.Ports.Count != PortMap.Count)
+			{
+				throw new InvalidOperationException(string.Format
+				(
+					"The sub-module ({0}), does not have the same amount of port maps ({1}) as the associated component's ({2}) ports ({3}).",
+					Name,
+					PortMap.Count.ToString(),
+					Component.Name,
+					Component.Ports.Count.ToString()
+				));
+			}
+
+			foreach (SimplifiedPortInfo info in Component.Ports)
+			{
+				if (!PortMap.ContainsKey(info))
+				{
+					throw new InvalidOperationException(string.Format
+					(
+						"The sub-module ({0}), does not have a mapping for a port ({1}) in the associated component ({2}).",
+						Name,
+						info.Name,
+						Component.Name
+					));
+				}
+			}
+		}
+
+		/// <summary>
+		///   Writes the sub-module to a stream.
+		/// </summary>
+		/// <param name="wr"><see cref="StreamWriter"/> object to write the sub-module to.</param>
+		/// <param name="indentOffset">Number of indents to add before any documentation begins.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="wr"/> is a null reference.</exception>
+		/// <exception cref="InvalidOperationException">There was a problem with the mappings.</exception>
+		/// <exception cref="IOException">An error occurred while writing to the <see cref="StreamWriter"/> object.</exception>
+		public override void Write(StreamWriter wr, int indentOffset)
+		{
+			if (wr == null)
+				throw new ArgumentNullException("wr");
+
+			if (indentOffset < 0)
+				indentOffset = 0;
+
+			// Validate the mappings.
+			ValidateMappings();
+
+			// Write the header.
+			WriteBasicHeader(wr, indentOffset);
+			DocumentationHelper.WriteLine(wr, string.Format("{0}: {1}", Name, Component.Name), indentOffset);
+			DocumentationHelper.WriteLine(wr, "generic map (", indentOffset);
+
+			// Write the generics out.
+			int index = 0;
+			string ending = ",";
+			foreach(SimplifiedGenericInfo info in GenericMap.Keys)
+			{
+				if (index == GenericMap.Count - 1)
+					ending = string.Empty;
+				DocumentationHelper.WriteLine(wr, string.Format("{0} => {1}{2}", info.Name, GenericMap[info], ending), indentOffset + 1);
+				index++;
+			}
+
+			DocumentationHelper.WriteLine(wr, ")", indentOffset);
+			DocumentationHelper.WriteLine(wr, "port map (", indentOffset);
+
+			// Write the ports out.
+			index = 0;
+			ending = ",";
+			foreach (SimplifiedPortInfo info in PortMap.Keys)
+			{
+				if (index == PortMap.Count - 1)
+					ending = string.Empty;
+				DocumentationHelper.WriteLine(wr, string.Format("{0} => {1}{2}", info.Name, PortMap[info], ending), indentOffset + 1);
+				index++;
+			}
+
+			DocumentationHelper.WriteLine(wr, ");", indentOffset);
 		}
 
 		#endregion Methods

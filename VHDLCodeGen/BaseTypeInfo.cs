@@ -12,6 +12,8 @@
 // limitations under the License.
 //********************************************************************************************************************************
 using System;
+using System.Collections.Generic;
+using System.IO;
 
 namespace VHDLCodeGen
 {
@@ -76,6 +78,212 @@ namespace VHDLCodeGen
 		public int CompareTo(BaseTypeInfo other)
 		{
 			return string.Compare(this.Name, other.Name);
+		}
+
+		/// <summary>
+		///   Gets the name of the type or derived type.
+		/// </summary>
+		/// <returns>String representing the name.</returns>
+		public string GetTypeName()
+		{
+			return this.GetType().Name;
+		}
+
+		/// <summary>
+		///   Validates that the array of objects are unique and have unique names.
+		/// </summary>
+		/// <param name="types">Array of <see cref="BaseTypeInfo"/> objects to compare.</param>
+		/// <param name="parentName">Name of the parent object.</param>
+		/// <param name="parentType">Type of the parent object.</param>
+		/// <exception cref="ArgumentException"><paramref name="parentName"/>, or <paramref name="parentType"/> is an empty string.</exception>
+		/// <exception cref="ArgumentNullException"><paramref name="types"/>, <paramref name="parentName"/>, or <paramref name="parentType"/> is a null reference.</exception>
+		/// <exception cref="InvalidOperationException">Two objects are the same or have the same name.</exception>
+		public static void ValidateNoDuplicates(BaseTypeInfo[] types, string parentName, string parentType)
+		{
+			if (types == null)
+				throw new ArgumentNullException("types");
+			if (parentName == null)
+				throw new ArgumentNullException("parentName");
+			if (parentName.Length == 0)
+				throw new ArgumentException("parentName is an empty string");
+			if (parentType == null)
+				throw new ArgumentNullException("parentType");
+			if (parentType.Length == 0)
+				throw new ArgumentException("parentType is an empty string");
+
+			Dictionary<string, BaseTypeInfo> childNames = new Dictionary<string, BaseTypeInfo>(types.Length);
+			foreach (BaseTypeInfo type in types)
+			{
+				if (childNames.ContainsKey(type.Name))
+					BaseTypeInfo.ValidateUniqueNames(type, childNames[type.Name], parentName, parentType);
+				childNames.Add(type.Name, type);
+			}
+		}
+
+		/// <summary>
+		///   Validates that the two objects are not equal and have unique names.
+		/// </summary>
+		/// <param name="info1">First <see cref="BaseTypeInfo"/> object to compare.</param>
+		/// <param name="info2">Second <see cref="BaseTypeInfo"/> object to compare.</param>
+		/// <param name="parentName">Name of the parent object.</param>
+		/// <param name="parentType">Type of the parent object.</param>
+		/// <exception cref="ArgumentException"><paramref name="parentName"/>, or <paramref name="parentType"/> is an empty string.</exception>
+		/// <exception cref="ArgumentNullException"><paramref name="info1"/>, <paramref name="info2"/>, <paramref name="parentName"/>, or <paramref name="parentType"/> is a null reference.</exception>
+		/// <exception cref="InvalidOperationException">The objects are the same or have the same name.</exception>
+		private static void ValidateUniqueNames(BaseTypeInfo info1, BaseTypeInfo info2, string parentName, string parentType)
+		{
+			if (info1 == null)
+				throw new ArgumentNullException("info1");
+			if (info2 == null)
+				throw new ArgumentNullException("info2");
+			if (parentName == null)
+				throw new ArgumentNullException("parentName");
+			if (parentName.Length == 0)
+				throw new ArgumentException("parentName is an empty string");
+			if (parentType == null)
+				throw new ArgumentNullException("parentType");
+			if (parentType.Length == 0)
+				throw new ArgumentException("parentType is an empty string");
+
+			if (string.Compare(info1.Name, info2.Name, true) != 0)
+				return;
+
+			string name1 = info1.GetTypeName();
+			if(info1 is DeclarationInfo)
+			{
+				DeclarationInfo info = info1 as DeclarationInfo;
+				name1 = Enum.GetName(typeof(DeclarationType), info.Declaration);
+			}
+
+			string name2 = info2.GetTypeName();
+			if (info2 is DeclarationInfo)
+			{
+				DeclarationInfo info = info2 as DeclarationInfo;
+				name2 = Enum.GetName(typeof(DeclarationType), info.Declaration);
+			}
+
+			if (info1 == info2)
+			{
+				throw new InvalidOperationException(string.Format
+				(
+					"A {0} ({1}) contains duplicate {2} object children ({2}).",
+					parentType,
+					parentName,
+					name1,
+					info1.Name
+				));
+			}
+
+			if (string.Compare(name1, name2, true) == 0)
+			{
+				throw new InvalidOperationException(string.Format
+				(
+					"A {0} ({1}) contains two {2} object children with the same name ({2}).",
+					parentType,
+					parentName,
+					name1,
+					info1.Name
+				));
+			}
+			else
+			{
+				throw new InvalidOperationException(string.Format
+				(
+					"A {0} ({1}) contains a child {2} and {3} object with the same name ({4}).",
+					parentType,
+					parentName,
+					name1,
+					name2,
+					info1.Name
+				));
+			}
+		}
+
+		/// <summary>
+		///   Writes the type to a stream.
+		/// </summary>
+		/// <param name="wr"><see cref="StreamWriter"/> object to write the type to.</param>
+		/// <param name="indentOffset">Number of indents to add before any documentation begins.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="wr"/> is a null reference.</exception>
+		/// <exception cref="InvalidOperationException">The current state of the type is such that it can't be written.</exception>
+		/// <exception cref="IOException">An error occurred while writing to the <see cref="StreamWriter"/> object.</exception>
+		public abstract void Write(StreamWriter wr, int indentOffset);
+
+		/// <summary>
+		///   Writes the basic file header composed of the summary and remarks section.
+		/// </summary>
+		/// <param name="wr"><see cref="StreamWriter"/> object to write the header to.</param>
+		/// <param name="indentOffset">Number of indents to add before any documentation begins.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="wr"/> is a null reference.</exception>
+		/// <exception cref="IOException">An error occurred while writing to the <see cref="StreamWriter"/> object.</exception>
+		public void WriteBasicHeader(StreamWriter wr, int indentOffset)
+		{
+			if (wr == null)
+				throw new ArgumentNullException("wr");
+
+			if (indentOffset < 0)
+				indentOffset = 0;
+
+			Dictionary<string, string[]> lookup = new Dictionary<string, string[]>(2);
+			lookup.Add("Summary", new string[] { Summary });
+			if (!string.IsNullOrWhiteSpace(Remarks))
+				lookup.Add("Remarks", new string[] { Remarks });
+
+			DocumentationHelper.WriteFlowerLine(wr, indentOffset);
+			DocumentationHelper.WriteGeneralDocumentationElements(wr, lookup, indentOffset);
+			DocumentationHelper.WriteFlowerLine(wr, indentOffset);
+		}
+
+		/// <summary>
+		///   Writes the types to a stream.
+		/// </summary>
+		/// <param name="regionName">Name of the region for the types.</param>
+		/// <param name="wr"><see cref="StreamWriter"/> object to write the types to.</param>
+		/// <param name="types">Array of <see cref="BaseTypeInfo"/> objects to write to the stream.</param>
+		/// <param name="indentOffset">Number of indents to add before any documentation begins.</param>
+		/// <param name="parentName">Name of the parent object.</param>
+		/// <param name="parentType">Type of the parent object.</param>
+		/// <exception cref="ArgumentException"><paramref name="parentName"/>, or <paramref name="parentType"/> is an empty string.</exception>
+		/// <exception cref="ArgumentNullException"><paramref name="wr"/>, <paramref name="parentName"/>, or <paramref name="parentType"/> is a null reference.</exception>
+		/// <exception cref="InvalidOperationException">A duplicate object or name is found in the <paramref name="types"/>.</exception>
+		/// <exception cref="IOException">An error occurred while writing to the <see cref="StreamWriter"/> object.</exception>
+		public static void WriteBaseTypeInfos(string regionName, StreamWriter wr, BaseTypeInfo[] types, int indentOffset, string parentName, string parentType)
+		{
+			if (wr == null)
+				throw new ArgumentNullException("wr");
+			if (types == null)
+				throw new ArgumentNullException("types");
+			if (parentName == null)
+				throw new ArgumentNullException("parentName");
+			if (parentName.Length == 0)
+				throw new ArgumentException("parentName is an empty string");
+			if (parentType == null)
+				throw new ArgumentNullException("parentType");
+			if (parentType.Length == 0)
+				throw new ArgumentException("parentType is an empty string");
+
+			if (indentOffset < 0)
+				indentOffset = 0;
+
+			// Write nothing if array is empty.
+			if (types.Length == 0)
+				return;
+
+			// Validate that we don't have duplicate names.
+			BaseTypeInfo.ValidateNoDuplicates(types, parentName, parentType);
+
+			List<BaseTypeInfo> list = new List<BaseTypeInfo>();
+			list.AddRange(types);
+			list.Sort();
+
+			if(!string.IsNullOrWhiteSpace(regionName))
+				DocumentationHelper.WriteRegionStart(wr, regionName, indentOffset);
+			for (int i = 0; i < list.Count; i++)
+			{
+				list[i].Write(wr, indentOffset);
+				if (i != list.Count - 1)
+					DocumentationHelper.WriteLine(wr); // Leave a line between declarations.
+			}
 		}
 
 		#endregion Methods

@@ -51,6 +51,15 @@ namespace VHDLCodeGen
 			Description = description;
 		}
 
+		/// <summary>
+		///   Gets the documentation string for this generic.
+		/// </summary>
+		/// <returns>String representing the documentation string.</returns>
+		public virtual string GetDocumentationString()
+		{
+			return string.Format("{0} - {1}", Name, Description);
+		}
+
 		#endregion Methods
 	}
 }
