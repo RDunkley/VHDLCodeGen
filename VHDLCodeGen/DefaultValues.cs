@@ -195,7 +195,7 @@ namespace VHDLCodeGen
 		private static string[] GenerateLicenseTemplate()
 		{
 			List<string> template = new List<string>();
-			template.Add("You can add a license of your choice here by setting CSCodeGen.DefaultValues.License property.");
+			template.Add("You can add a license of your choice here by setting VHDLCodeGen.DefaultValues.License property.");
 			template.Add("Here is a list of template items that may aid in your license, file header, or copyright template:");
 			template.Add("");
 			template.Add("	<%year%> - Replaced with the current year.");

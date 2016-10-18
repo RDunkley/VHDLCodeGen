@@ -152,7 +152,7 @@ namespace VHDLCodeGen
 				if (i != Parameters.Count - 1)
 					sb.Append("; ");
 			}
-			sb.AppendFormat(") return {0} is");
+			sb.AppendFormat(") return {0} is", Name);
 			return sb.ToString();
 		}
 
