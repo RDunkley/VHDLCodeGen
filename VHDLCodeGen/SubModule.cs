@@ -70,6 +70,27 @@ namespace VHDLCodeGen
 		}
 
 		/// <summary>
+		///   Gets all the unique components contained in the sub-modules.
+		/// </summary>
+		/// <param name="subModules"><see cref="SubModule"/>s to pull unique <see cref="ComponentInfo"/> base objects from.</param>
+		/// <returns>Array of unique components.</returns>
+		/// <remarks>This method determines uniqueness by the instance not by the <see cref="SubModule"/>'s name.</remarks>
+		/// <exception cref="ArgumentNullException"><paramref name="subModules"/> is a null reference.</exception>
+		public static ComponentInfo[] GetUniqueComponents(IEnumerable<SubModule> subModules)
+		{
+			if (subModules == null)
+				throw new ArgumentNullException("subModules");
+
+			List<ComponentInfo> components = new List<ComponentInfo>();
+			foreach (SubModule mod in subModules)
+			{
+				if (!components.Contains(mod.Component))
+					components.Add(mod.Component);
+			}
+			return components.ToArray();
+		}
+
+		/// <summary>
 		///   Validates that mappings have a one-to-one relationship.
 		/// </summary>
 		/// <exception cref="InvalidOperationException">The maps don't have a one-to-one relationship.</exception>

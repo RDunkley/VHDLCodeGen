@@ -51,6 +51,7 @@
     <Compile Include="DefaultValues.cs" />
     <Compile Include="DocumentationHelper.cs" />
     <Compile Include="EntityInfo.cs" />
+    <Compile Include="FileInfo.cs" />
     <Compile Include="FunctionInfo.cs" />
     <Compile Include="GenerateInfo.cs" />
     <Compile Include="GenericInfo.cs" />

@@ -153,45 +153,15 @@ namespace VHDLCodeGen
 			childList.AddRange(DeclaredTypes);
 			childList.AddRange(Functions);
 			childList.AddRange(Procedures);
-			childList.AddRange(GetUniqueComponents());
+			childList.AddRange(SubModule.GetUniqueComponents(SubModules));
 			childList.AddRange(Signals);
 			childList.AddRange(Aliases);
-			childList.AddRange(GetUniqueAttributeDeclarations());
+			childList.AddRange(AttributeDeclarationInfo.GetUniqueAttributeDeclarations(Attributes));
 			childList.AddRange(Processes);
 			childList.AddRange(Generates);
 			childList.AddRange(SubModules);
 
 			BaseTypeInfo.ValidateNoDuplicates(childList.ToArray(), Entity.Name, "module");
-		}
-
-		/// <summary>
-		///   Gets all the unique declarations contained in the attribute specifications.
-		/// </summary>
-		/// <returns>Array of unique declarations.</returns>
-		private AttributeDeclarationInfo[] GetUniqueAttributeDeclarations()
-		{
-			List<AttributeDeclarationInfo> declarations = new List<AttributeDeclarationInfo>();
-			foreach (AttributeSpecificationInfo spec in Attributes)
-			{
-				if (!declarations.Contains(spec.Declaration))
-					declarations.Add(spec.Declaration);
-			}
-			return declarations.ToArray();
-		}
-
-		/// <summary>
-		///   Gets all the unique components contained in the sub-modules.
-		/// </summary>
-		/// <returns>Array of unique components.</returns>
-		private ComponentInfo[] GetUniqueComponents()
-		{
-			List<ComponentInfo> components = new List<ComponentInfo>();
-			foreach(SubModule mod in SubModules)
-			{
-				if (!components.Contains(mod.Component))
-					components.Add(mod.Component);
-			}
-			return components.ToArray();
 		}
 
 		/// <summary>
@@ -235,7 +205,7 @@ namespace VHDLCodeGen
 				DocumentationHelper.WriteLine(wr);
 
 			// Components
-			ComponentInfo[] components = GetUniqueComponents();
+			ComponentInfo[] components = SubModule.GetUniqueComponents(SubModules);
 			BaseTypeInfo.WriteBaseTypeInfos("Components", wr, components, indentOffset, Entity.Name, "module");
 			if (components.Length > 0)
 				DocumentationHelper.WriteLine(wr);

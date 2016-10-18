@@ -12,6 +12,7 @@
 // limitations under the License.
 //********************************************************************************************************************************
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace VHDLCodeGen
@@ -50,6 +51,26 @@ namespace VHDLCodeGen
 				throw new ArgumentException("type is an empty string");
 
 			Type = type;
+		}
+
+		/// <summary>
+		///   Gets all the unique declarations contained in the attribute specifications.
+		/// </summary>
+		/// <param name="attribs"><see cref="AttributeSpecificationInfo"/> objects to find the unique <see cref="AttributeDeclarationInfo"/> objects from.</param>
+		/// <returns>Array of unique declarations.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="attribs"/> is a null reference.</exception>
+		public static AttributeDeclarationInfo[] GetUniqueAttributeDeclarations(IEnumerable<AttributeSpecificationInfo> attribs)
+		{
+			if (attribs == null)
+				throw new ArgumentNullException("attribs");
+
+			List<AttributeDeclarationInfo> declarations = new List<AttributeDeclarationInfo>();
+			foreach (AttributeSpecificationInfo spec in attribs)
+			{
+				if (!declarations.Contains(spec.Declaration))
+					declarations.Add(spec.Declaration);
+			}
+			return declarations.ToArray();
 		}
 
 		/// <summary>
