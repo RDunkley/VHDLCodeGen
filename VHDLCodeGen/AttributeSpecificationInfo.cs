@@ -177,7 +177,7 @@ namespace VHDLCodeGen
 			}
 
 			// Validate that we don't have duplicate names in the declarations.
-			List<AttributeDeclarationInfo> list = new List<AttributeDeclarationInfo>(lookup.Count);
+			List<AttributeDeclarationInfo> list = new List<AttributeDeclarationInfo>(lookup.Keys);
 			BaseTypeInfo.ValidateNoDuplicates(list.ToArray(), parentName, parentType);
 			list.Sort();
 

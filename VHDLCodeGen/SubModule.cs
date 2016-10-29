@@ -171,34 +171,45 @@ namespace VHDLCodeGen
 			// Write the header.
 			WriteBasicHeader(wr, indentOffset);
 			DocumentationHelper.WriteLine(wr, string.Format("{0}: {1}", Name, Component.Name), indentOffset);
-			DocumentationHelper.WriteLine(wr, "generic map (", indentOffset);
 
-			// Write the generics out.
-			int index = 0;
-			string ending = ",";
-			foreach(SimplifiedGenericInfo info in GenericMap.Keys)
+			if (GenericMap.Count > 0)
 			{
-				if (index == GenericMap.Count - 1)
-					ending = string.Empty;
-				DocumentationHelper.WriteLine(wr, string.Format("{0} => {1}{2}", info.Name, GenericMap[info], ending), indentOffset + 1);
-				index++;
+				DocumentationHelper.WriteLine(wr, "generic map (", indentOffset);
+
+				// Write the generics out.
+				int index = 0;
+				string ending = ",";
+				foreach (SimplifiedGenericInfo info in GenericMap.Keys)
+				{
+					if (index == GenericMap.Count - 1)
+						ending = string.Empty;
+					DocumentationHelper.WriteLine(wr, string.Format("{0} => {1}{2}", info.Name, GenericMap[info], ending), indentOffset + 1);
+					index++;
+				}
+
+				if(PortMap.Count == 0)
+					DocumentationHelper.WriteLine(wr, ");", indentOffset);
+				else
+					DocumentationHelper.WriteLine(wr, ")", indentOffset);
 			}
 
-			DocumentationHelper.WriteLine(wr, ")", indentOffset);
-			DocumentationHelper.WriteLine(wr, "port map (", indentOffset);
-
-			// Write the ports out.
-			index = 0;
-			ending = ",";
-			foreach (SimplifiedPortInfo info in PortMap.Keys)
+			if (PortMap.Count > 0)
 			{
-				if (index == PortMap.Count - 1)
-					ending = string.Empty;
-				DocumentationHelper.WriteLine(wr, string.Format("{0} => {1}{2}", info.Name, PortMap[info], ending), indentOffset + 1);
-				index++;
-			}
+				DocumentationHelper.WriteLine(wr, "port map (", indentOffset);
 
-			DocumentationHelper.WriteLine(wr, ");", indentOffset);
+				// Write the ports out.
+				int index = 0;
+				string ending = ",";
+				foreach (SimplifiedPortInfo info in PortMap.Keys)
+				{
+					if (index == PortMap.Count - 1)
+						ending = string.Empty;
+					DocumentationHelper.WriteLine(wr, string.Format("{0} => {1}{2}", info.Name, PortMap[info], ending), indentOffset + 1);
+					index++;
+				}
+
+				DocumentationHelper.WriteLine(wr, ");", indentOffset);
+			}
 		}
 
 		#endregion Methods

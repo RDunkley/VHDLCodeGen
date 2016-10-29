@@ -33,6 +33,11 @@ namespace VHDLCodeGen
 		/// </summary>
 		public string Type { get; protected set; }
 
+		/// <summary>
+		///   When true the signal represents the actual signal and a pre-clocked signal (Ex: sig, next_sig).
+		/// </summary>
+		public bool AddPreClockSignal { get; set; }
+
 		#endregion Properties
 
 		#region Methods
@@ -78,9 +83,13 @@ namespace VHDLCodeGen
 			if (!string.IsNullOrWhiteSpace(DefaultValue))
 				defaultValueString = string.Format(" := {0}", DefaultValue);
 
+			string nextValueString = string.Empty;
+			if (AddPreClockSignal)
+				nextValueString = string.Format(", next_{0}", DefaultValue);
+
 			// Write the header.
 			WriteBasicHeader(wr, indentOffset);
-			DocumentationHelper.WriteLine(wr, string.Format("signal {0} : {1}{2};", Name, Type, defaultValueString), indentOffset);
+			DocumentationHelper.WriteLine(wr, string.Format("signal {0} : {1}{2}{3};", Name, Type, nextValueString, defaultValueString), indentOffset);
 		}
 
 		#endregion Methods

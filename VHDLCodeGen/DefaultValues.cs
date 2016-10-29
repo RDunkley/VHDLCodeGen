@@ -196,22 +196,22 @@ namespace VHDLCodeGen
 		{
 			List<string> template = new List<string>();
 			template.Add("You can add a license of your choice here by setting VHDLCodeGen.DefaultValues.License property.");
-			template.Add("Here is a list of template items that may aid in your license, file header, or copyright template:");
-			template.Add("");
-			template.Add("	<%year%> - Replaced with the current year.");
-			template.Add("	<%date%> - Replaced with the current date.");
-			template.Add("	<%time%> - Replaced with the current time.");
-			template.Add("	<%datetime%> - Replaced with the current date and time.");
-			template.Add("	<%developer%> - Replaced with the Developer's Name (as specified in the DefaultValues properties).");
-			template.Add("	<%company%> - Replaced with the Company Name (as specified in the DefaultValues properties).");
-			template.Add("	<%appversion%> - Replaced with the calling application's version.");
-			template.Add("	<%appname%> - Replaced with the calling application's name.");
-			template.Add("	<%libraryversion%> - Replaced with the CSCodeGen library version.");
-			template.Add("	<%libraryname%> - Replaced with the CSCodeGen library name.");
-			template.Add("	<%copyright%> - Replaced with the copyright statement (cannot be cyclic).");
-			template.Add("	<%license%> - Replaced with the license statement (cannot be cyclic).");
-			template.Add("	<%filename%> - Replaced with the file name being generated.");
-			template.Add("	<%description%> - Replaced with a description of the file being generated.");
+			//template.Add("Here is a list of template items that may aid in your license, file header, or copyright template:");
+			//template.Add("");
+			//template.Add("	<%year%> - Replaced with the current year.");
+			//template.Add("	<%date%> - Replaced with the current date.");
+			//template.Add("	<%time%> - Replaced with the current time.");
+			//template.Add("	<%datetime%> - Replaced with the current date and time.");
+			//template.Add("	<%developer%> - Replaced with the Developer's Name (as specified in the DefaultValues properties).");
+			//template.Add("	<%company%> - Replaced with the Company Name (as specified in the DefaultValues properties).");
+			//template.Add("	<%appversion%> - Replaced with the calling application's version.");
+			//template.Add("	<%appname%> - Replaced with the calling application's name.");
+			//template.Add("	<%libraryversion%> - Replaced with the CSCodeGen library version.");
+			//template.Add("	<%libraryname%> - Replaced with the CSCodeGen library name.");
+			//template.Add("	<%copyright%> - Replaced with the copyright statement (cannot be cyclic).");
+			//template.Add("	<%license%> - Replaced with the license statement (cannot be cyclic).");
+			//template.Add("	<%filename%> - Replaced with the file name being generated.");
+			//template.Add("	<%description%> - Replaced with a description of the file being generated.");
 			return template.ToArray();
 		}
 

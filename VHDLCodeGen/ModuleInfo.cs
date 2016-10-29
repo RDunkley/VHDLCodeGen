@@ -189,14 +189,14 @@ namespace VHDLCodeGen
 			DocumentationHelper.WriteLine(wr, string.Format("architecture {0} of {1} is", Enum.GetName(typeof(ArchitecturalType), Type), Entity.Name), indentOffset);
 			DocumentationHelper.WriteLine(wr);
 
-			// Types and Constants
-			DeclarationInfo.WriteDeclarations(wr, DeclaredTypes.ToArray(), indentOffset, Entity.Name, "module");
-			if(DeclaredTypes.Count > 0)
-				DocumentationHelper.WriteLine(wr);
-
 			// Functions
 			BaseTypeInfo.WriteBaseTypeInfos("Functions", wr, Functions.ToArray(), indentOffset, Entity.Name, "module");
 			if (Functions.Count > 0)
+				DocumentationHelper.WriteLine(wr);
+
+			// Types and Constants
+			DeclarationInfo.WriteDeclarations(wr, DeclaredTypes.ToArray(), indentOffset, Entity.Name, "module");
+			if(DeclaredTypes.Count > 0)
 				DocumentationHelper.WriteLine(wr);
 
 			// Procedures

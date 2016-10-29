@@ -252,6 +252,173 @@ namespace VHDLCodeGen
 		}
 
 		/// <summary>
+		///   Gets information about places to split in the line.
+		/// </summary>
+		/// <param name="line">Line to obtain information about.</param>
+		/// <param name="stringLookup">Lookup table containing the start location and length of strings in the line.</param>
+		/// <param name="semiColons">Indexes of semicolon signs in the line (not including string sections).</param>
+		/// <param name="comma">Indexes of commas in the line (not including string sections).</param>
+		private static void GetLineSplitInfo(string line, out Dictionary<int, int> stringLookup, out List<int> semiColons, out List<int> comma)
+		{
+			// Find the locations in the line where strings are, commas, and equal signs. These are the areas we will split on.
+			stringLookup = new Dictionary<int, int>();
+			semiColons = new List<int>();
+			comma = new List<int>();
+			bool inString = false;
+			int start = 0;
+			for (int i = 0; i < line.Length; i++)
+			{
+				if (line[i] == '"')
+				{
+					if (inString)
+					{
+						// If inString is true then must not be in position 0 so we don't need to worry about i-1.
+						// Only assume end of string if the '\' character does not preceed it.
+						if (line[i - 1] != '\\')
+						{
+							stringLookup.Add(start, i - start);
+							inString = false;
+						}
+					}
+					else
+					{
+						start = i;
+						inString = true;
+					}
+				}
+				else if (line[i] == ';')
+				{
+					if (!inString)
+						semiColons.Add(i);
+				}
+				else if (line[i] == ',')
+				{
+					if (!inString)
+						comma.Add(i);
+				}
+			}
+		}
+
+		/// <summary>
+		///   Determines whether the <paramref name="index"/> is located in the string based on the provided <paramref name="stringLookup"/>.
+		/// </summary>
+		/// <param name="stringLookup">Lookup table of the start and lengths of the string sections in the line.</param>
+		/// <param name="index">Index into the line to check to see if it is in a string.</param>
+		/// <returns>True if <paramref name="index"/> is in a string section, false otherwise.</returns>
+		private static bool IsInString(Dictionary<int, int> stringLookup, int index)
+		{
+			foreach (int start in stringLookup.Keys)
+			{
+				if (start > index)
+					return false; // Can't find one that works.
+				if (start + stringLookup[start] >= index)
+					return true;
+			}
+			return false;
+		}
+
+		/// <summary>
+		///   Splits the line, if possible, at valid points.
+		/// </summary>
+		/// <param name="line">Line to be split.</param>
+		/// <param name="numIndents">>Number of indentations to include before the text.</param>
+		/// <returns>Array of new lines provided by the split.</returns>
+		private static string[] SplitLine(string line, int numIndents)
+		{
+			// Check for tabs or spaces at the beginning of the line.
+			int numCharacters = 0;
+			int additionalWhiteSpaceSize = 0;
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < line.Length; i++)
+			{
+				if (line[i] == ' ')
+				{
+					numCharacters++;
+					additionalWhiteSpaceSize++;
+					sb.Append(' ');
+				}
+				else if (line[i] == '\t')
+				{
+					numCharacters++;
+					additionalWhiteSpaceSize += DefaultValues.TabSize;
+					sb.Append('\t');
+				}
+				else
+				{
+					break;
+				}
+			}
+			string additionalWhiteSpace = sb.ToString();
+			line = line.Substring(numCharacters);
+
+			// Find the locations in the line where strings are, commas, and equal signs. These are the areas we will split on.
+			Dictionary<int, int> stringLookup;
+			List<int> equalSign;
+			List<int> comma;
+			GetLineSplitInfo(line, out stringLookup, out equalSign, out comma);
+
+			List<string> newLines = new List<string>();
+			bool firstSplit = true;
+			int whiteSpaceSize = numIndents * DefaultValues.TabSize;
+			string ws = GenerateLeadingWhitespace(numIndents);
+			while (whiteSpaceSize + additionalWhiteSpaceSize + line.Length > DefaultValues.NumCharactersPerLine)
+			{
+				// Find a good split location.
+				int splitLocation = 0;
+				bool found = false;
+				bool splitInString = false;
+				for (int i = DefaultValues.NumCharactersPerLine - whiteSpaceSize - additionalWhiteSpaceSize - 1; i > 0; i--)
+				{
+					// Check for equals.
+					if (equalSign.Contains(i) || comma.Contains(i))
+					{
+						splitLocation = i;
+						found = true;
+						break;
+					}
+					if (IsInString(stringLookup, i) && line[i] == ' ')
+					{
+						splitLocation = i;
+						found = true;
+						splitInString = true;
+						break;
+					}
+				}
+
+				if (!found)
+					break; // Couldn't find a break point.
+
+				if (splitInString)
+				{
+					newLines.Add(string.Format("{0}{1}{2}\"", ws, additionalWhiteSpace, line.Substring(0, splitLocation)));
+					line = string.Format("& \"{0}", line.Substring(splitLocation));
+					GetLineSplitInfo(line, out stringLookup, out equalSign, out comma);
+				}
+				else
+				{
+					newLines.Add(string.Format("{0}{1}{2}", ws, additionalWhiteSpace, line.Substring(0, splitLocation + 1)));
+					if (line[splitLocation + 1] == ' ')
+						line = line.Substring(splitLocation + 2); // Skip the space if found.
+					else
+						line = line.Substring(splitLocation + 1);
+					GetLineSplitInfo(line, out stringLookup, out equalSign, out comma);
+				}
+
+				if (firstSplit)
+				{
+					additionalWhiteSpaceSize += DefaultValues.TabSize;
+					additionalWhiteSpace = string.Format("{0}{1}", additionalWhiteSpace, GenerateLeadingWhitespace(1));
+					firstSplit = false;
+				}
+			}
+
+			// Finally add the last line.
+			newLines.Add(string.Format("{0}{1}{2}", ws, additionalWhiteSpace, line));
+
+			return newLines.ToArray();
+		}
+
+		/// <summary>
 		///   Splits the comment text on a space between words, or splits a word and hyphens it.
 		/// </summary>
 		/// <param name="text">Text to evaluate for splitting.</param>
@@ -354,8 +521,15 @@ namespace VHDLCodeGen
 
 			if (numWhiteSpace + text.Length > DefaultValues.NumCharactersPerLine)
 			{
-				// Line is too long. If there is a comment we can split it up.
-				// TODO: Add the ability to split the text up.
+				// Line is too long so split it into multiple lines if possible.
+				string[] splits = SplitLine(text, indentOffset);
+				int size = 0;
+				foreach (string split in splits)
+				{
+					wr.WriteLine(split);
+					size += split.Length;
+				}
+				return size;
 			}
 			wr.Write(string.Format("{0}{1}", whiteSpace, text));
 			return numWhiteSpace + text.Length;
@@ -520,6 +694,7 @@ namespace VHDLCodeGen
 
 			// Add the word with spaces on each side.
 			sb.AppendFormat(" {0} ", nameOfRegion);
+			index += nameOfRegion.Length + 2;
 
 			for (int i = index; i < DefaultValues.NumCharactersPerLine; i++)
 				sb.Append(DefaultValues.FlowerBoxCharacter);
@@ -568,8 +743,15 @@ namespace VHDLCodeGen
 
 			if (numWhiteSpace + line.Length > DefaultValues.NumCharactersPerLine)
 			{
-				// Line is too long. If there is a comment we can split it up.
-				// TODO: Add the ability to split the text up.
+				// Line is too long so split it into multiple lines if possible.
+				string[] splits = SplitLine(line, indentOffset);
+				int size = 0;
+				foreach (string split in splits)
+				{
+					wr.WriteLine(split);
+					size += split.Length;
+				}
+				return size;
 			}
 			wr.WriteLine(string.Format("{0}{1}", whiteSpace, line));
 			return numWhiteSpace + line.Length;
