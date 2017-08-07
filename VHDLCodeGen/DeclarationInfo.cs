@@ -114,13 +114,17 @@ namespace VHDLCodeGen
 				));
 			}
 
+			string typeAssigner = "is";
+			if (Declaration == DeclarationType.Constant)
+				typeAssigner = ":";
+
 			string defaultValueString = string.Empty;
 			if (!string.IsNullOrWhiteSpace(DefaultValue))
 				defaultValueString = string.Format(" := {0}", DefaultValue);
 
 			// Write the header.
 			WriteBasicHeader(wr, indentOffset);
-			DocumentationHelper.WriteLine(wr, string.Format("{0} {1} : {2}{3};", Enum.GetName(typeof(DeclarationType), Declaration).ToLower(), Name, Type, defaultValueString), indentOffset);
+			DocumentationHelper.WriteLine(wr, string.Format("{0} {1} {2} {3}{4};", Enum.GetName(typeof(DeclarationType), Declaration).ToLower(), Name, typeAssigner, Type, defaultValueString), indentOffset);
 		}
 
 		/// <summary>
