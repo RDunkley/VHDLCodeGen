@@ -85,7 +85,7 @@ namespace VHDLCodeGen
 
 			string nextValueString = string.Empty;
 			if (AddPreClockSignal)
-				nextValueString = string.Format(", next_{0}", DefaultValue);
+				nextValueString = string.Format(", next_{0}", Name);
 
 			// Write the header.
 			WriteBasicHeader(wr, indentOffset);
