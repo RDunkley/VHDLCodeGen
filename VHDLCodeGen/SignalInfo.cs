@@ -89,7 +89,7 @@ namespace VHDLCodeGen
 
 			// Write the header.
 			WriteBasicHeader(wr, indentOffset);
-			DocumentationHelper.WriteLine(wr, string.Format("signal {0} : {1}{2}{3};", Name, Type, nextValueString, defaultValueString), indentOffset);
+			DocumentationHelper.WriteLine(wr, string.Format("signal {0}{1} : {2}{3};", Name, nextValueString, Type, defaultValueString), indentOffset);
 		}
 
 		#endregion Methods
