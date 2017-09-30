@@ -39,6 +39,11 @@ namespace VHDLCodeGen
 		/// </summary>
 		public Dictionary<SimplifiedPortInfo, string> PortMap { get; private set; }
 
+		/// <summary>
+		///   Lookup table for port conversions.
+		/// </summary>
+		public Dictionary<SimplifiedPortInfo, string> ConversionMap { get; private set; }
+
 		#endregion Properties
 
 		#region Methods
@@ -67,6 +72,10 @@ namespace VHDLCodeGen
 			PortMap = new Dictionary<SimplifiedPortInfo, string>(component.Ports.Count);
 			foreach (SimplifiedPortInfo port in component.Ports)
 				PortMap.Add(port, null);
+
+			ConversionMap = new Dictionary<SimplifiedPortInfo, string>(component.Ports.Count);
+			foreach (SimplifiedPortInfo port in component.Ports)
+				ConversionMap.Add(port, null);
 		}
 
 		/// <summary>
@@ -204,7 +213,10 @@ namespace VHDLCodeGen
 				{
 					if (index == PortMap.Count - 1)
 						ending = string.Empty;
-					DocumentationHelper.WriteLine(wr, string.Format("{0} => {1}{2}", info.Name, PortMap[info], ending), indentOffset + 1);
+					if(ConversionMap[info] == null)
+						DocumentationHelper.WriteLine(wr, string.Format("{0} => {1}{2}", info.Name, PortMap[info], ending), indentOffset + 1);
+					else
+						DocumentationHelper.WriteLine(wr, string.Format("{0}({1}) => {2}{3}", ConversionMap[info], info.Name, PortMap[info], ending), indentOffset + 1);
 					index++;
 				}
 
