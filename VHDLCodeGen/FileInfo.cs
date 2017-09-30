@@ -23,6 +23,26 @@ namespace VHDLCodeGen
 	/// </summary>
 	public class FileInfo
 	{
+		#region Enumerations
+
+		/// <summary>
+		///   Enumerates the various file extensions that can be assigned to the VHDL file.
+		/// </summary>
+		public enum FileExtensionType
+		{
+			/// <summary>
+			///   Extension of the file is "vhdl".
+			/// </summary>
+			VHDL,
+
+			/// <summary>
+			///   Extension of the file is "vhd".
+			/// </summary>
+			VHD,
+		}
+
+		#endregion Enumerations
+
 		#region Properties
 
 		/// <summary>
@@ -60,11 +80,12 @@ namespace VHDLCodeGen
 		/// <param name="info"><see cref="ModuleInfo"/> object containing the VHDL code to place in the file.</param>
 		/// <param name="relativePath">Relative path where the file is represented.</param>
 		/// <param name="description">Description of the file.</param>
-		/// <param name="fileNameExtension">Extension to add to the filename. (Ex: 'designer' would be for filename.designer.cs). Can be null or empty.</param>
+		/// <param name="extension"><see cref="FileExtensionType"/> defining the extension to use on the file.</param>
+		/// <param name="fileNameExtension">Extension to add to the filename. (Ex: 'designer' would be for filename.designer.vhdl). Can be null or empty.</param>
 		/// <exception cref="ArgumentNullException"><paramref name="nameSpace"/> or <paramref name="info"/> is a null reference.</exception>
 		/// <exception cref="ArgumentException"><paramref name="nameSpace"/> is an empty string.</exception>
 		/// <exception cref="ArgumentException"><paramref name="relativePath"/> is defined, but is not a relative path.</exception>
-		public FileInfo(ModuleInfo info, string relativePath = null, string description = null, string fileNameExtension = null)
+		public FileInfo(ModuleInfo info, string relativePath = null, string description = null, FileExtensionType extension = FileExtensionType.VHDL, string fileNameExtension = null)
 		{
 			if (info == null)
 				throw new ArgumentNullException("info");
@@ -80,7 +101,7 @@ namespace VHDLCodeGen
 				fileNameExtension = string.Empty;
 			else
 				fileNameExtension = string.Format(".{0}", fileNameExtension);
-			FileName = string.Format("{0}{1}.vhdl", info.Entity.Name, fileNameExtension);
+			FileName = string.Format("{0}{1}.{2}", info.Entity.Name, fileNameExtension, Enum.GetName(typeof(FileExtensionType), extension).ToLower());
 			RelativePath = relativePath;
 			Module = info;
 			Description = description;
