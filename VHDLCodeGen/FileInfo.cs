@@ -151,15 +151,27 @@ namespace VHDLCodeGen
 
 			// Add Functions.
 			if (info.Functions.Count > 0)
+			{
+				info.Functions.Sort();
 				lookup.Add("Functions:", GenerateNamesFromBaseTypeInfo(info.Functions.ToArray()));
+			}
 
 			// Add Declarations.
 			if (info.DeclaredTypes.Count > 0)
+			{
+				info.DeclaredTypes.Sort();
 				lookup.Add("Constants & Types:", GenerateNamesFromBaseTypeInfo(info.DeclaredTypes.ToArray()));
+			}
 
 			// Add Procedures.
 			if (info.Procedures.Count > 0)
+			{
+				info.Procedures.Sort();
 				lookup.Add("Procedures:", GenerateNamesFromBaseTypeInfo(info.Procedures.ToArray()));
+			}
+
+			if (info.SubModules.Count > 0)
+				info.SubModules.Sort();
 
 			// Add Components.
 			ComponentInfo[] components = SubModule.GetUniqueComponents(info.SubModules);
@@ -168,11 +180,20 @@ namespace VHDLCodeGen
 
 			// Add Signals.
 			if (info.Signals.Count > 0)
+			{
+				info.Signals.Sort();
 				lookup.Add("Signals:", GenerateNamesFromBaseTypeInfo(info.Signals.ToArray()));
+			}
 
 			// Add Aliases.
 			if (info.Aliases.Count > 0)
+			{
+				info.Aliases.Sort();
 				lookup.Add("Aliases:", GenerateNamesFromBaseTypeInfo(info.Aliases.ToArray()));
+			}
+
+			if (info.Attributes.Count > 0)
+				info.Attributes.Sort();
 
 			// Add Attributes.
 			AttributeDeclarationInfo[] declarations = AttributeDeclarationInfo.GetUniqueAttributeDeclarations(info.Attributes);
@@ -181,11 +202,17 @@ namespace VHDLCodeGen
 
 			// Add Processes.
 			if (info.Processes.Count > 0)
+			{
+				info.Processes.Sort();
 				lookup.Add("Processes:", GenerateNamesFromBaseTypeInfo(info.Processes.ToArray()));
+			}
 
 			// Add Generates.
 			if (info.Generates.Count > 0)
+			{
+				info.Generates.Sort();
 				lookup.Add("Generates:", GenerateNamesFromBaseTypeInfo(info.Generates.ToArray()));
+			}
 
 			// Add Sub-Modules.
 			if (info.SubModules.Count > 0)
