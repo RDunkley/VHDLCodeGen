@@ -44,6 +44,7 @@
     <Compile Include="ArchitecturalType.cs" />
     <Compile Include="AttributeDeclarationInfo.cs" />
     <Compile Include="AttributeSpecificationInfo.cs" />
+    <Compile Include="BaseSimplifiedTypeInfo.cs" />
     <Compile Include="BaseTypeInfo.cs" />
     <Compile Include="ComponentInfo.cs" />
     <Compile Include="DeclarationInfo.cs" />

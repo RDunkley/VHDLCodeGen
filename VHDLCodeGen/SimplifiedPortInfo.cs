@@ -19,29 +19,14 @@ namespace VHDLCodeGen
 	/// <summary>
 	///   Represents a simplified VHDL port.
 	/// </summary>
-	public class SimplifiedPortInfo
+	public class SimplifiedPortInfo : BaseSimplifiedTypeInfo
 	{
 		#region Properties
-
-		/// <summary>
-		///   Default value of the port. Can be null or empty.
-		/// </summary>
-		public string DefaultValue { get; set; }
 
 		/// <summary>
 		///   Direction of the port.
 		/// </summary>
 		public PortDirection Direction { get; protected set; }
-
-		/// <summary>
-		///   Name of the port.
-		/// </summary>
-		public string Name { get; protected set; }
-
-		/// <summary>
-		///   Type of the port.
-		/// </summary>
-		public string Type { get; protected set; }
 
 		#endregion Properties
 
@@ -57,33 +42,18 @@ namespace VHDLCodeGen
 		/// <exception cref="ArgumentNullException"><paramref name="name"/>, or <paramref name="type"/> is a null reference.</exception>
 		/// <exception cref="ArgumentException"><paramref name="name"/>, or <paramref name="type"/> is an empty string.</exception>
 		public SimplifiedPortInfo(string name, PortDirection direction, string type, string defaultValue = null)
+			: base(name, type, defaultValue)
 		{
-			if (name == null)
-				throw new ArgumentNullException("name");
-			if (name.Length == 0)
-				throw new ArgumentException("name is an empty string");
-			if (type == null)
-				throw new ArgumentNullException("type");
-			if (type.Length == 0)
-				throw new ArgumentException("type is an empty string");
-
-
-			Name = name;
 			Direction = direction;
-			DefaultValue = defaultValue;
-			Type = type;
 		}
 
 		/// <summary>
-		///   Gets the declaration of the port.
+		///   Gets the string for the declaration.
 		/// </summary>
-		/// <returns>Declaration of the port.</returns>
-		public string GetDeclaration()
+		/// <param name="defaultValueString">Default value string. Can be empty.</param>
+		/// <returns>Complete declaration string.</returns>
+		protected override string GetDeclarationString(string defaultValueString)
 		{
-			string defaultValueString = string.Empty;
-			if (!string.IsNullOrWhiteSpace(DefaultValue))
-				defaultValueString = string.Format(" := {0}", DefaultValue);
-
 			return string.Format("{0} : {1} {2}{3}", Name, Enum.GetName(typeof(PortDirection), Direction).ToLower(), Type, defaultValueString);
 		}
 

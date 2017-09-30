@@ -19,27 +19,8 @@ namespace VHDLCodeGen
 	/// <summary>
 	///   Represents a simplified VHDL generic.
 	/// </summary>
-	public class SimplifiedGenericInfo
+	public class SimplifiedGenericInfo : BaseSimplifiedTypeInfo
 	{
-		#region Properties
-
-		/// <summary>
-		///   Default value of the generic. Can be null or empty.
-		/// </summary>
-		public string DefaultValue { get; set; }
-
-		/// <summary>
-		///   Name of the generic.
-		/// </summary>
-		public string Name { get; protected set; }
-
-		/// <summary>
-		///   Type of the generic.
-		/// </summary>
-		public string Type { get; protected set; }
-
-		#endregion Properties
-
 		#region Methods
 
 		/// <summary>
@@ -51,31 +32,17 @@ namespace VHDLCodeGen
 		/// <exception cref="ArgumentNullException"><paramref name="type"/>, or <paramref name="name"/> is a null reference.</exception>
 		/// <exception cref="ArgumentException"><paramref name="type"/>, or <paramref name="name"/> is an empty string.</exception>
 		public SimplifiedGenericInfo(string name, string type, string defaultValue = null)
+			: base(name, type, defaultValue)
 		{
-			if (type == null)
-				throw new ArgumentNullException("type");
-			if (type.Length == 0)
-				throw new ArgumentException("type is an empty string");
-			if (name == null)
-				throw new ArgumentNullException("name");
-			if (name.Length == 0)
-				throw new ArgumentException("name is an empty string");
-
-			Name = name;
-			Type = type;
-			DefaultValue = defaultValue;
 		}
 
 		/// <summary>
-		///   Gets the declaration of the generic.
+		///   Gets the string for the declaration.
 		/// </summary>
-		/// <returns>Declaration of the generic.</returns>
-		public string GetDeclaration()
+		/// <param name="defaultValueString">Default value string. Can be empty.</param>
+		/// <returns>Complete declaration string.</returns>
+		protected override string GetDeclarationString(string defaultValueString)
 		{
-			string defaultValueString = string.Empty;
-			if (!string.IsNullOrWhiteSpace(DefaultValue))
-				defaultValueString = string.Format(" := {0}", DefaultValue);
-
 			return string.Format("{0} : {1}{2}", Name, Type, defaultValueString);
 		}
 
