@@ -34,7 +34,7 @@ namespace VHDLCodeGen
 		///   List of <see cref="ParameterInfo"/> objects representing parameters passed into the funtion in order of appearance
 		///   in signature. Can be empty.
 		/// </summary>
-		public List<ParameterInfo> Parameters { get; private set; }
+		public NamedTypeList<ParameterInfo> Parameters { get; private set; }
 
 		/// <summary>
 		///   Return type of the function.
@@ -49,7 +49,7 @@ namespace VHDLCodeGen
 		/// <summary>
 		///   List of <see cref="VariableInfo"/> objects representing variables declared in the function. Can be empty.
 		/// </summary>
-		public List<VariableInfo> Variables { get; private set; }
+		public NamedTypeList<VariableInfo> Variables { get; private set; }
 
 		#endregion Properties
 
@@ -79,8 +79,8 @@ namespace VHDLCodeGen
 
 			ReturnType = returnType;
 			ReturnTypeSummary = returnTypeSummary;
-			Parameters = new List<ParameterInfo>();
-			Variables = new List<VariableInfo>();
+			Parameters = new NamedTypeList<ParameterInfo>();
+			Variables = new NamedTypeList<VariableInfo>();
 			CodeLines = new List<string>();
 		}
 

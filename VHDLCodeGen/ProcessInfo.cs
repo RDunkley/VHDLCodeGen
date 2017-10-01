@@ -38,7 +38,7 @@ namespace VHDLCodeGen
 		/// <summary>
 		///   List of <see cref="VariableInfo"/> objects representing the variables in the process. Can be empty.
 		/// </summary>
-		public List<VariableInfo> Variables;
+		public NamedTypeList<VariableInfo> Variables;
 
 		#endregion Properties
 
@@ -56,7 +56,7 @@ namespace VHDLCodeGen
 			: base(name, summary, remarks)
 		{
 			SensitivityList = new List<string>();
-			Variables = new List<VariableInfo>();
+			Variables = new NamedTypeList<VariableInfo>();
 			CodeLines = new List<string>();
 		}
 

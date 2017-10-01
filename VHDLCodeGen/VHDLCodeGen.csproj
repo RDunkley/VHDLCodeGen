@@ -46,6 +46,8 @@
     <Compile Include="AttributeSpecificationInfo.cs" />
     <Compile Include="BaseSimplifiedTypeInfo.cs" />
     <Compile Include="BaseTypeInfo.cs" />
+    <Compile Include="NamedTypeDictionary.cs" />
+    <Compile Include="NamedTypeList.cs" />
     <Compile Include="ComponentInfo.cs" />
     <Compile Include="DeclarationInfo.cs" />
     <Compile Include="DeclarationType.cs" />
@@ -56,7 +58,9 @@
     <Compile Include="FunctionInfo.cs" />
     <Compile Include="GenerateInfo.cs" />
     <Compile Include="GenericInfo.cs" />
+    <Compile Include="INamedType.cs" />
     <Compile Include="ModuleInfo.cs" />
+    <Compile Include="NamedTypeLookup.cs" />
     <Compile Include="ParameterInfo.cs" />
     <Compile Include="PortInfo.cs" />
     <Compile Include="PortDirection.cs" />

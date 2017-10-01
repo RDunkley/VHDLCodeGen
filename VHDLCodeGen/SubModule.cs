@@ -32,17 +32,17 @@ namespace VHDLCodeGen
 		/// <summary>
 		///   Lookup table for the generic mapping.
 		/// </summary>
-		public Dictionary<SimplifiedGenericInfo, string> GenericMap { get; private set; }
+		public NamedTypeLookup<SimplifiedGenericInfo, string> GenericMap { get; private set; }
 
 		/// <summary>
 		///   Lookup table for the port mapping.
 		/// </summary>
-		public Dictionary<SimplifiedPortInfo, string> PortMap { get; private set; }
+		public NamedTypeLookup<SimplifiedPortInfo, string> PortMap { get; private set; }
 
 		/// <summary>
 		///   Lookup table for port conversions.
 		/// </summary>
-		public Dictionary<SimplifiedPortInfo, string> ConversionMap { get; private set; }
+		public NamedTypeLookup<SimplifiedPortInfo, string> ConversionMap { get; private set; }
 
 		#endregion Properties
 
@@ -65,17 +65,9 @@ namespace VHDLCodeGen
 
 			Component = component;
 
-			GenericMap = new Dictionary<SimplifiedGenericInfo, string>(component.Generics.Count);
-			foreach (SimplifiedGenericInfo gen in component.Generics)
-				GenericMap.Add(gen, null);
-
-			PortMap = new Dictionary<SimplifiedPortInfo, string>(component.Ports.Count);
-			foreach (SimplifiedPortInfo port in component.Ports)
-				PortMap.Add(port, null);
-
-			ConversionMap = new Dictionary<SimplifiedPortInfo, string>(component.Ports.Count);
-			foreach (SimplifiedPortInfo port in component.Ports)
-				ConversionMap.Add(port, null);
+			GenericMap = new NamedTypeLookup<SimplifiedGenericInfo, string>(component.Generics);
+			PortMap = new NamedTypeLookup<SimplifiedPortInfo, string>(component.Ports);
+			ConversionMap = new NamedTypeLookup<SimplifiedPortInfo, string>(component.Ports);
 		}
 
 		/// <summary>

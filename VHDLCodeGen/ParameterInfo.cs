@@ -18,7 +18,7 @@ namespace VHDLCodeGen
 	/// <summary>
 	///   Represents the information of a VHDL function parameter.
 	/// </summary>
-	public class ParameterInfo
+	public class ParameterInfo : INamedType
 	{
 		#region Properties
 

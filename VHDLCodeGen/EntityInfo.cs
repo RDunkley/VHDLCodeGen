@@ -27,12 +27,12 @@ namespace VHDLCodeGen
 		/// <summary>
 		///   List of <see cref="GenericInfo"/> objects representing the generics of the component. Can be empty.
 		/// </summary>
-		public List<GenericInfo> Generics { get; private set; }
+		public NamedTypeList<GenericInfo> Generics { get; private set; }
 
 		/// <summary>
 		///   List of <see cref="PortInfo"/> objects representing the ports of the component. Can be empty.
 		/// </summary>
-		public List<PortInfo> Ports { get; private set; }
+		public NamedTypeList<PortInfo> Ports { get; private set; }
 
 		#endregion Properties
 
@@ -49,8 +49,8 @@ namespace VHDLCodeGen
 		public EntityInfo(string name, string summary, string remarks = null)
 			: base(name, summary, remarks)
 		{
-			Generics = new List<GenericInfo>();
-			Ports = new List<PortInfo>();
+			Generics = new NamedTypeList<GenericInfo>();
+			Ports = new NamedTypeList<PortInfo>();
 		}
 
 		/// <summary>

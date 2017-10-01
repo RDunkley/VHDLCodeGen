@@ -20,7 +20,7 @@ namespace VHDLCodeGen
 	/// <summary>
 	///   Abstract base class of all the VHDL types.
 	/// </summary>
-	public abstract class BaseTypeInfo : IComparable<BaseTypeInfo>
+	public abstract class BaseTypeInfo : IComparable<BaseTypeInfo>, INamedType
 	{
 		#region Properties
 

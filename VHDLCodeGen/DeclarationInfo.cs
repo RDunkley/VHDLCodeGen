@@ -40,7 +40,7 @@ namespace VHDLCodeGen
 		/// <summary>
 		///   List of <see cref="DeclarationInfo"/> objects that this object is dependent upon. Can be empty.
 		/// </summary>
-		public List<DeclarationInfo> Dependency { get; private set; }
+		public NamedTypeList<DeclarationInfo> Dependency { get; private set; }
 
 		/// <summary>
 		///   Type of the declaration.
@@ -84,7 +84,7 @@ namespace VHDLCodeGen
 			Declaration = declaration;
 			Type = type;
 			DefaultValue = defaultValue;
-			Dependency = new List<DeclarationInfo>();
+			Dependency = new NamedTypeList<DeclarationInfo>();
 		}
 
 

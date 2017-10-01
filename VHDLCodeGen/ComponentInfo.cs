@@ -27,12 +27,12 @@ namespace VHDLCodeGen
 		/// <summary>
 		///   List of <see cref="SimplifiedGenericInfo"/> objects representing the generics of the component. Can be empty.
 		/// </summary>
-		public List<SimplifiedGenericInfo> Generics { get; private set; }
+		public NamedTypeList<SimplifiedGenericInfo> Generics { get; private set; }
 
 		/// <summary>
 		///   List of <see cref="SimplifiedPortInfo"/> objects representing the ports of the component. Can be empty.
 		/// </summary>
-		public List<SimplifiedPortInfo> Ports { get; private set; }
+		public NamedTypeList<SimplifiedPortInfo> Ports { get; private set; }
 
 		#endregion Properties
 
@@ -49,8 +49,8 @@ namespace VHDLCodeGen
 		public ComponentInfo(string name, string summary, string remarks = null)
 			: base(name, summary, remarks)
 		{
-			Generics = new List<SimplifiedGenericInfo>();
-			Ports = new List<SimplifiedPortInfo>();
+			Generics = new NamedTypeList<SimplifiedGenericInfo>();
+			Ports = new NamedTypeList<SimplifiedPortInfo>();
 		}
 
 		/// <summary>
@@ -61,11 +61,11 @@ namespace VHDLCodeGen
 		public ComponentInfo(EntityInfo info)
 			: base(info.Name, info.Summary, info.Remarks)
 		{
-			Generics = new List<SimplifiedGenericInfo>(info.Generics.Count);
+			Generics = new NamedTypeList<SimplifiedGenericInfo>(info.Generics.Count);
 			foreach (GenericInfo gen in info.Generics)
 				Generics.Add(new SimplifiedGenericInfo(gen.Name, gen.Type, gen.DefaultValue));
 
-			Ports = new List<SimplifiedPortInfo>(info.Ports.Count);
+			Ports = new NamedTypeList<SimplifiedPortInfo>(info.Ports.Count);
 			foreach (PortInfo port in info.Ports)
 				Ports.Add(new SimplifiedPortInfo(port.Name, port.Direction, port.Type, port.DefaultValue));
 		}

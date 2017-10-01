@@ -41,7 +41,7 @@ namespace VHDLCodeGen
 		/// <summary>
 		///   List of <see cref="AliasInfo"/> objects representing the aliases in the module. Can be empty.
 		/// </summary>
-		public List<AliasInfo> Aliases { get; private set; }
+		public NamedTypeList<AliasInfo> Aliases { get; private set; }
 
 		/// <summary>
 		///   List of <see cref="AttributeSpecificationInfo"/> objects representing the attributes in the module. Can be empty.
@@ -56,7 +56,7 @@ namespace VHDLCodeGen
 		/// <summary>
 		///   List of <see cref="DeclarationInfo"/> objects representing the declared types in the module. Can be empty.
 		/// </summary>
-		public List<DeclarationInfo> DeclaredTypes { get; private set; }
+		public NamedTypeList<DeclarationInfo> DeclaredTypes { get; private set; }
 
 		/// <summary>
 		///   Entity associated with the module.
@@ -66,32 +66,32 @@ namespace VHDLCodeGen
 		/// <summary>
 		///   List of <see cref="FunctionInfo"/> objects representing the functions in the module. Can be empty.
 		/// </summary>
-		public List<FunctionInfo> Functions { get; private set; }
+		public NamedTypeList<FunctionInfo> Functions { get; private set; }
 
 		/// <summary>
 		///   List of <see cref="GenerateInfo"/> objects representing the generate sections in the module. Can be empty.
 		/// </summary>
-		public List<GenerateInfo> Generates { get; private set; }
+		public NamedTypeList<GenerateInfo> Generates { get; private set; }
 
 		/// <summary>
 		///   List of <see cref="ProcedureInfo"/> objects representing the procedures in the module. Can be empty.
 		/// </summary>
-		public List<ProcedureInfo> Procedures { get; private set; }
+		public NamedTypeList<ProcedureInfo> Procedures { get; private set; }
 
 		/// <summary>
 		///   List of <see cref="ProcessInfo"/> objects representing the processes in the module. Can be empty.
 		/// </summary>
-		public List<ProcessInfo> Processes { get; private set; }
+		public NamedTypeList<ProcessInfo> Processes { get; private set; }
 
 		/// <summary>
 		///   List of <see cref="SignalInfo"/> objects representing the signals in the module. Can be empty.
 		/// </summary>
-		public List<SignalInfo> Signals { get; private set; }
+		public NamedTypeList<SignalInfo> Signals { get; private set; }
 
 		/// <summary>
 		///   List of <see cref="SubModule"/> objects representing the instantiated components in the module. Can be empty.
 		/// </summary>
-		public List<SubModule> SubModules { get; private set; }
+		public NamedTypeList<SubModule> SubModules { get; private set; }
 
 		/// <summary>
 		///   Architectural type associated with the module.
@@ -127,15 +127,15 @@ namespace VHDLCodeGen
 			Type = type;
 			Entity = entity;
 
-			DeclaredTypes = new List<DeclarationInfo>();
-			Functions = new List<FunctionInfo>();
-			Procedures = new List<ProcedureInfo>();
-			Signals = new List<SignalInfo>();
-			Aliases = new List<AliasInfo>();
+			DeclaredTypes = new NamedTypeList<DeclarationInfo>();
+			Functions = new NamedTypeList<FunctionInfo>();
+			Procedures = new NamedTypeList<ProcedureInfo>();
+			Signals = new NamedTypeList<SignalInfo>();
+			Aliases = new NamedTypeList<AliasInfo>();
 			Attributes = new List<AttributeSpecificationInfo>();
-			Processes = new List<ProcessInfo>();
-			Generates = new List<GenerateInfo>();
-			SubModules = new List<SubModule>();
+			Processes = new NamedTypeList<ProcessInfo>();
+			Generates = new NamedTypeList<GenerateInfo>();
+			SubModules = new NamedTypeList<SubModule>();
 			ConcurrentStatements = new List<string>();
 
 			// Add the default usings.

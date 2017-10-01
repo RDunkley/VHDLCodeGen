@@ -34,12 +34,12 @@ namespace VHDLCodeGen
 		///   List of <see cref="ProcedureParameterInfo"/> objects representing parameters passed into the procedure in order of
 		///   appearance in signature.
 		/// </summary>
-		public List<ProcedureParameterInfo> Parameters { get; private set; }
+		public NamedTypeList<ProcedureParameterInfo> Parameters { get; private set; }
 
 		/// <summary>
 		///   List of <see cref="VariableInfo"/> objects representing variables declared in the procedure. Can be empty.
 		/// </summary>
-		public List<VariableInfo> Variables { get; private set; }
+		public NamedTypeList<VariableInfo> Variables { get; private set; }
 
 		#endregion Properties
 
@@ -56,8 +56,8 @@ namespace VHDLCodeGen
 		public ProcedureInfo(string name, string summary, string remarks = null)
 			: base(name, summary, remarks)
 		{
-			Parameters = new List<ProcedureParameterInfo>();
-			Variables = new List<VariableInfo>();
+			Parameters = new NamedTypeList<ProcedureParameterInfo>();
+			Variables = new NamedTypeList<VariableInfo>();
 			CodeLines = new List<string>();
 		}
 

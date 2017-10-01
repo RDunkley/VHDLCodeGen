@@ -32,7 +32,7 @@ namespace VHDLCodeGen
 		/// <summary>
 		///   List of the <see cref="GenerateInfo"/> objects representing the generate blocks inside this generate block. Can be empty.
 		/// </summary>
-		public List<GenerateInfo> Generates { get; private set; }
+		public NamedTypeList<GenerateInfo> Generates { get; private set; }
 
 		/// <summary>
 		///   Generate statement.
@@ -43,12 +43,12 @@ namespace VHDLCodeGen
 		/// <summary>
 		///   List of the <see cref="ProcessInfo"/> objects representing the processes defined inside the generate block. Can be empty.
 		/// </summary>
-		public List<ProcessInfo> Processes { get; private set; }
+		public NamedTypeList<ProcessInfo> Processes { get; private set; }
 
 		/// <summary>
 		///   List of the <see cref="SubModule"/> objects representing the sub-modules defined inside the generate block. Can be empty.
 		/// </summary>
-		public List<SubModule> SubModules { get; private set; }
+		public NamedTypeList<SubModule> SubModules { get; private set; }
 
 		#endregion Properties
 
@@ -73,9 +73,9 @@ namespace VHDLCodeGen
 
 			GenerateStatement = generateStatement;
 			ConcurrentStatements = new List<string>();
-			Processes = new List<ProcessInfo>();
-			SubModules = new List<SubModule>();
-			Generates = new List<GenerateInfo>();
+			Processes = new NamedTypeList<ProcessInfo>();
+			SubModules = new NamedTypeList<SubModule>();
+			Generates = new NamedTypeList<GenerateInfo>();
 		}
 
 		/// <summary>

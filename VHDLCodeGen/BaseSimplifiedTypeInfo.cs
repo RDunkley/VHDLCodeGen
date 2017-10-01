@@ -18,7 +18,7 @@ namespace VHDLCodeGen
 	/// <summary>
 	///   Represents a simplified VHDL type.
 	/// </summary>
-	public abstract class BaseSimplifiedTypeInfo : IComparable<BaseSimplifiedTypeInfo>
+	public abstract class BaseSimplifiedTypeInfo : IComparable<BaseSimplifiedTypeInfo>, INamedType
 	{
 		#region Properties
 
