@@ -27,5 +27,10 @@ namespace VHDLCodeGen
 		///   Represents an Register Transfer Level (RTL) architecture.
 		/// </summary>
 		RTL,
+
+		/// <summary>
+		///   Represents a structural architecture defining the interconnection of components.
+		/// </summary>
+		Structural,
 	}
 }
