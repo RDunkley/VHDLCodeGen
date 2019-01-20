@@ -55,7 +55,7 @@ namespace TestApp
 			info.DeclaredTypes[2].Dependency.Add(info.DeclaredTypes[1]);
 
 			info.Functions.Add(new FunctionInfo("SumUp", "unsigned", "Provides the summation of two numbers", "16-bit unsigned number containing the sum", "Some kind of remarks"));
-			info.Functions[0].Parameters.Add(new ParameterInfo("number1", "unsigned(15 downto 0)", "First number to sum up"));
+			info.Functions[0].Parameters.Add(new ParameterInfo("number1", "unsigned(15 downto 0)", "First number to sum up. This number also has a really long description so that it will wrap lines. This is to check that the line wrapping works as it should."));
 			info.Functions[0].Parameters.Add(new ParameterInfo("number2", "unsigned(15 downto 0)", "Second number to sum up"));
 			info.Functions[0].Variables.Add(new VariableInfo("temp", "unsigned(15 downto 0)", "Temporary value to store the result"));
 			info.Functions[0].CodeLines.Add("temp := number1 + number2;");

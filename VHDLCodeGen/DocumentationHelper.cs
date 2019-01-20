@@ -611,26 +611,32 @@ namespace VHDLCodeGen
 			if (documentation.Count == 0)
 				return;
 
-			int maxLength = 0;
+			int maxKeyLength = 0;
 			foreach(string key in documentation.Keys)
 			{
-				if (key.Length > maxLength)
-					maxLength = key.Length;
+				if (key.Length > maxKeyLength)
+					maxKeyLength = key.Length;
 			}
 
 			int wsLength;
 			string ws = GenerateLeadingWhitespace(indentOffset, out wsLength);
-			string newLine = string.Format("-- {0}  ", GenerateSpaces(maxLength));
+			string newLine = string.Format("-- {0}  ", GenerateSpaces(maxKeyLength));
 
-			foreach (string key in documentation.Keys)
+			bool first = true;
+			foreach(string key in documentation.Keys)
 			{
-				string additionalKeySpace = GenerateSpaces(maxLength - key.Length);
+				if (first)
+					first = false;
+				else
+					wr.WriteLine("--"); // Add a blank line in between sections.
+
+				string additionalKeySpace = GenerateSpaces(maxKeyLength - key.Length);
 				if (documentation[key].Length == 1)
 				{
 					if (wsLength + newLine.Length + documentation[key][0].Length > DefaultValues.NumCharactersPerLine)
 					{
 						wr.Write(string.Format("{0}-- {1}: {2}", ws, key, additionalKeySpace));
-						AddCommentToEndOfLine(wr, documentation[key][0], newLine.Length, indentOffset, newLine);
+						AddDocumentationSubElement(wr, documentation[key][0], newLine.Length, indentOffset, newLine);
 					}
 					else
 					{
@@ -647,7 +653,7 @@ namespace VHDLCodeGen
 						if (wsLength + newLine.Length + documentation[key][i].Length > DefaultValues.NumCharactersPerLine)
 						{
 							wr.Write(newLine);
-							AddCommentToEndOfLine(wr, documentation[key][i], newLine.Length, indentOffset, newLine);
+							AddDocumentationSubElement(wr, documentation[key][i], newLine.Length, indentOffset, newLine);
 						}
 						else
 						{
@@ -656,6 +662,37 @@ namespace VHDLCodeGen
 						}
 					}
 				}
+			}
+		}
+
+		/// <summary>
+		///   This method calls <see cref="AddCommentToEndOfLine(StreamWriter, string, int, int, string)"/>, but before doing so
+		///   determines whether the comment to be written has a sub item. If a sub-item exists it will route any wrap around comments accordingly.
+		/// </summary>
+		/// <param name="wr"><see cref="StreamWriter"/> object to write the comment to.</param>
+		/// <param name="comment">Comment to be written.</param>
+		/// <param name="previousTextSize">Size of previous text that has been placed on the line.</param>
+		/// <param name="indentOffset">Number of indents to be applied before a new line comment.</param>
+		/// <param name="newLine">Newline to be added if the text wraps around prior to writing the additional text.</param>
+		private static void AddDocumentationSubElement(StreamWriter wr, string comment, int previousTextSize, int indentOffset, string newLine)
+		{
+			// Check to see if the item has a sub item. For example:
+			// -- Parameters:
+			// --             param1 - first parameter.
+			// --             param2 - second parameter.
+			// param1 is a sub item. In this case if the sentence overruns the line we should start it equal to the 'f' in "first parameter" in order to make it look neat.
+			string[] splits = comment.Split(' ');
+			if(splits.Length > 2 && splits[1] == "-")
+			{
+				// Write the first portion.
+				wr.Write(string.Format("{0} - ", splits[0]));
+				int written = splits[0].Length + 3;
+				newLine = string.Format("{0}{1}", newLine, GenerateSpaces(written));
+				AddCommentToEndOfLine(wr, comment.Substring(written), previousTextSize + written, indentOffset, newLine);
+			}
+			else
+			{
+				AddCommentToEndOfLine(wr, comment, previousTextSize, indentOffset, newLine);
 			}
 		}
 
