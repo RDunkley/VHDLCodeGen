@@ -430,6 +430,26 @@ namespace VHDLCodeGen
 		/// </summary>
 		public static bool UseTabs { get; set; }
 
+		/// <summary>
+		///   True if the optional type names should be added at the end of type declarations.
+		/// </summary>
+		/// <remarks>
+		///   The VHDL specification allows for optional type names on the following items: entity, architecture, function,
+		///   procedure, and package. These optional type names are placed after the end statement. For example, the end
+		///   of an entity can be 'end;' or 'end entity;'.
+		/// </remarks>
+		public static bool AddOptionalTypeNames { get; set; }
+
+		/// <summary>
+		///   True if the optional type names should be added at the end of type declarations.
+		/// </summary>
+		/// <remarks>
+		///   The VHDL specification allows for optional names/labels on the following items: entity, architecture, component,
+		///   function, procedure, generate, process, record, and package. These optional name/labels are placed after the end
+		///   statement and type statement. For example, the end of an entity can be 'end entity;' or 'end entity TEST_MODULE;'.
+		/// </remarks>
+		public static bool AddOptionalNames { get; set; }
+
 		#endregion Properties
 
 		#region Methods
@@ -467,6 +487,8 @@ namespace VHDLCodeGen
 			SectionStartTemplate = GenerateSectionStartTemplate();
 			SectionEndTemplate = GenerateSectionEndTemplate();
 			IncludeSubHeader = true;
+			AddOptionalTypeNames = true;
+			AddOptionalNames = true;
 		}
 
 		/// <summary>

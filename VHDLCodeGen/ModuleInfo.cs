@@ -14,6 +14,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace VHDLCodeGen
 {
@@ -248,7 +249,14 @@ namespace VHDLCodeGen
 			if (SubModules.Count > 0)
 				DocumentationHelper.WriteLine(wr);
 
-			DocumentationHelper.WriteLine(wr, string.Format("end {0};", Enum.GetName(typeof(ArchitecturalType), Type)), indentOffset);
+			StringBuilder sb = new StringBuilder();
+			sb.Append("end");
+			if (DefaultValues.AddOptionalTypeNames)
+				sb.Append(" architecture");
+			if (DefaultValues.AddOptionalNames)
+				sb.AppendFormat(" {0}", Enum.GetName(typeof(ArchitecturalType), Type));
+			sb.Append(";");
+			DocumentationHelper.WriteLine(wr, sb.ToString(), indentOffset);
 		}
 
 		/// <summary>

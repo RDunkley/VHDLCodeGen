@@ -14,6 +14,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace VHDLCodeGen
 {
@@ -132,7 +133,12 @@ namespace VHDLCodeGen
 			BaseTypeInfo.WriteBaseTypeInfos("Sub-Modules", wr, SubModules.ToArray(), indentOffset, Name, "generate");
 
 			indentOffset--;
-			DocumentationHelper.WriteLine(wr, "end generate;", indentOffset);
+			StringBuilder sb = new StringBuilder();
+			sb.Append("end generate");
+			if (DefaultValues.AddOptionalNames)
+				sb.AppendFormat(" {0}", Name);
+			sb.Append(";");
+			DocumentationHelper.WriteLine(wr, sb.ToString(), indentOffset);
 		}
 
 		/// <summary>

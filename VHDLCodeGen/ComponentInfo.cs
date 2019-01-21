@@ -14,6 +14,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace VHDLCodeGen
 {
@@ -99,7 +100,12 @@ namespace VHDLCodeGen
 			if (Ports.Count > 0)
 				SimplifiedPortInfo.WritePortDeclaration(wr, Ports.ToArray(), indentOffset);
 
-			DocumentationHelper.WriteLine(wr, "end component;", indentOffset);
+			StringBuilder sb = new StringBuilder();
+			sb.Append("end component");
+			if (DefaultValues.AddOptionalNames)
+				sb.AppendFormat(" {0}", Name);
+			sb.Append(";");
+			DocumentationHelper.WriteLine(wr, sb.ToString(), indentOffset);
 		}
 
 		#endregion Methods

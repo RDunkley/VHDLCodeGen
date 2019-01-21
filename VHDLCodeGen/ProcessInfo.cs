@@ -93,7 +93,12 @@ namespace VHDLCodeGen
 			foreach (string line in CodeLines)
 				DocumentationHelper.WriteLine(wr, line, indentOffset + 1);
 
-			DocumentationHelper.WriteLine(wr, "end process;", indentOffset);
+			StringBuilder sb = new StringBuilder();
+			sb.Append("end process");
+			if (DefaultValues.AddOptionalNames)
+				sb.AppendFormat(" {0}", Name);
+			sb.Append(";");
+			DocumentationHelper.WriteLine(wr, sb.ToString(), indentOffset);
 		}
 
 		/// <summary>

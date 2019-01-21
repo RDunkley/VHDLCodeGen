@@ -31,6 +31,8 @@ namespace TestApp
 			DefaultValues.LicenseTemplate = new string[] { "License by ME! A team of lawyers will come after you if you do anything I don't like with this module.", "-------------------------------------------------------------------------------------------------------------------------------" };
 			DefaultValues.SectionStartTemplate = new string[] { "-- Start <%param%>", "" };
 			DefaultValues.SectionEndTemplate = new string[] { "", "-- End <%param%>" };
+			DefaultValues.AddOptionalNames = false;
+			DefaultValues.AddOptionalTypeNames = false;
 
 			// NOTE: this code may not be functional. It is to evalute the workings of the library not perform any function.
 			ModuleInfo info = new ModuleInfo(ArchitecturalType.RTL, new EntityInfo("TEST", "Test module to try out code gen.", "Additional Remarks"));
