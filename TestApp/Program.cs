@@ -33,6 +33,7 @@ namespace TestApp
 			DefaultValues.SectionEndTemplate = new string[] { "", "-- End <%param%>" };
 			DefaultValues.AddOptionalNames = false;
 			DefaultValues.AddOptionalTypeNames = false;
+			DefaultValues.AddSpaceAfterKeyWords = true;
 
 			// NOTE: this code may not be functional. It is to evalute the workings of the library not perform any function.
 			ModuleInfo info = new ModuleInfo(ArchitecturalType.RTL, new EntityInfo("TEST", "Test module to try out code gen.", "Additional Remarks"));

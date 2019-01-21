@@ -73,7 +73,10 @@ namespace VHDLCodeGen
 			if (ports.Length == 0)
 				throw new ArgumentException("generics is an empty array");
 
-			DocumentationHelper.WriteLine(wr, "port (", indentOffset);
+			if(DefaultValues.AddSpaceAfterKeyWords)
+				DocumentationHelper.WriteLine(wr, "port (", indentOffset);
+			else
+				DocumentationHelper.WriteLine(wr, "port(", indentOffset);
 			string ending = ";";
 			for (int i = 0; i < ports.Length; i++)
 			{

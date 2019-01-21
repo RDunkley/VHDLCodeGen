@@ -62,7 +62,10 @@ namespace VHDLCodeGen
 			if (generics.Length == 0)
 				throw new ArgumentException("generics is an empty array");
 
-			DocumentationHelper.WriteLine(wr, "generic (", indentOffset);
+			if(DefaultValues.AddSpaceAfterKeyWords)
+				DocumentationHelper.WriteLine(wr, "generic (", indentOffset);
+			else
+				DocumentationHelper.WriteLine(wr, "generic(", indentOffset);
 			string ending = ";";
 			for (int i = 0; i < generics.Length; i++)
 			{

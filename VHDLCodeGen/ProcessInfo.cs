@@ -108,7 +108,10 @@ namespace VHDLCodeGen
 		private string GetSensitivityListLine()
 		{
 			StringBuilder sb = new StringBuilder();
-			sb.Append("process(");
+			if(DefaultValues.AddSpaceAfterKeyWords)
+				sb.Append("process (");
+			else
+				sb.Append("process(");
 			for(int i = 0; i < SensitivityList.Count; i++)
 			{
 				sb.Append(SensitivityList[i]);

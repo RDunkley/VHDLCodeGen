@@ -175,7 +175,10 @@ namespace VHDLCodeGen
 
 			if (GenericMap.Count > 0)
 			{
-				DocumentationHelper.WriteLine(wr, "generic map (", indentOffset);
+				if(DefaultValues.AddSpaceAfterKeyWords)
+					DocumentationHelper.WriteLine(wr, "generic map (", indentOffset);
+				else
+					DocumentationHelper.WriteLine(wr, "generic map(", indentOffset);
 
 				// Write the generics out.
 				int index = 0;
@@ -196,7 +199,10 @@ namespace VHDLCodeGen
 
 			if (PortMap.Count > 0)
 			{
-				DocumentationHelper.WriteLine(wr, "port map (", indentOffset);
+				if(DefaultValues.AddSpaceAfterKeyWords)
+					DocumentationHelper.WriteLine(wr, "port map (", indentOffset);
+				else
+					DocumentationHelper.WriteLine(wr, "port map(", indentOffset);
 
 				// Write the ports out.
 				int index = 0;

@@ -129,7 +129,10 @@ namespace VHDLCodeGen
 		private string GetSignature()
 		{
 			StringBuilder sb = new StringBuilder();
-			sb.AppendFormat("procedure {0}(", Name);
+			if(DefaultValues.AddSpaceAfterKeyWords)
+				sb.AppendFormat("procedure {0} (", Name);
+			else
+				sb.AppendFormat("procedure {0}(", Name);
 			for (int i = 0; i < Parameters.Count; i++)
 			{
 				sb.Append(Parameters[i].GetSignatureString());

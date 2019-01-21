@@ -450,6 +450,15 @@ namespace VHDLCodeGen
 		/// </remarks>
 		public static bool AddOptionalNames { get; set; }
 
+		/// <summary>
+		///   True if a space should be added after keywords, false otherwise.
+		/// </summary>
+		/// <remarks>
+		///   For example, a process declaraction can be written as 'process (' or 'process('. This boolean value determines which is chosen.
+		///   This applies to ports, generics, functions, procedures, and processes.
+		/// </remarks>
+		public static bool AddSpaceAfterKeyWords { get; set; }
+
 		#endregion Properties
 
 		#region Methods
@@ -489,6 +498,7 @@ namespace VHDLCodeGen
 			IncludeSubHeader = true;
 			AddOptionalTypeNames = true;
 			AddOptionalNames = true;
+			AddSpaceAfterKeyWords = false;
 		}
 
 		/// <summary>

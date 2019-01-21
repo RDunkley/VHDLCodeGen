@@ -152,8 +152,11 @@ namespace VHDLCodeGen
 		private string GetSignature()
 		{
 			StringBuilder sb = new StringBuilder();
-			sb.AppendFormat("function {0}(", Name);
-			for(int i = 0; i < Parameters.Count; i++)
+			if(DefaultValues.AddSpaceAfterKeyWords)
+				sb.AppendFormat("function {0} (", Name);
+			else
+				sb.AppendFormat("function {0}(", Name);
+			for (int i = 0; i < Parameters.Count; i++)
 			{
 				sb.Append(Parameters[i].GetSignatureString());
 				if (i != Parameters.Count - 1)

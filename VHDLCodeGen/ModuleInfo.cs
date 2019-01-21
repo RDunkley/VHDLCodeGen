@@ -256,7 +256,7 @@ namespace VHDLCodeGen
 			if (DefaultValues.AddOptionalNames)
 				sb.AppendFormat(" {0}", Enum.GetName(typeof(ArchitecturalType), Type));
 			sb.Append(";");
-			DocumentationHelper.WriteLine(wr, sb.ToString(), indentOffset);
+			DocumentationHelper.Write(wr, sb.ToString(), indentOffset);
 		}
 
 		/// <summary>
