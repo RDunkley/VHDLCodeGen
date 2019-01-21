@@ -36,24 +36,36 @@ The templates above have defaults in them that you will definitely want to chang
 
 Generic Tags:
 	1. <%year%> - Replaced with the current year.
+
 	2. <%date%> - Replaced with the current date.
+
 	3. <%time%> - Replaced with the current time.
+
 	4. <%datetime%> - Replaced with the current date and time.
 
 Global Tags:
 	1. <%developer%> - Replaced with the Developer's Name (as specified in the DefaultValues properties).
+
 	2. <%company%> - Replaced with the Company Name (as specified in the DefaultValues properties).
+
 	3. <%appversion%> - Replaced with the calling application's version.
+
 	4. <%appname%> - Replaced with the calling application's name.
+
 	5. <%libraryversion%> - Replaced with the VHDLCodeGen library version.
+
 	6. <%libraryname%> - Replaced with the VHDLCodeGen library name.
+
 	7. <%flowerfill%> - Fills the rest of the line with the flower character.
 
 Other Template Tags:
 	1. <%copyright%> - Replaced with the copyright statement (cannot be cyclic).
+
 	2. <%license%> - Replaced with the license statement (cannot be cyclic).
 
 Item Specific Tags:
 	1. <%filename%> - Replaced with the file name being generated.
+
 	2. <%description%> - Replaced with a description of the file being generated.
+
 	3. <%param%> - Replaced with a parameter based on context. See individual template for details.
