@@ -104,7 +104,7 @@ namespace VHDLCodeGen
 		/// <param name="isCopyRight">True if the line is part of the copyright template (prevents endless cycles).</param>
 		/// <returns>String with the template items replaced.</returns>
 		/// <exception cref="ArgumentNullException">template is a null reference.</exception>
-		public static string ConvertTemplateLineToActual(string template, string fileName, string description, bool? isCopyRight = null, bool? isLicense = null)
+		public static string ConvertTemplateLineToActual(string template, string fileName, string description, string param = null, bool? isCopyRight = null, bool? isLicense = null, int previousCharacters = 0)
 		{
 			if (template == null)
 				throw new ArgumentNullException("template");
@@ -116,6 +116,8 @@ namespace VHDLCodeGen
 				fileName = string.Empty;
 			if (description == null)
 				description = string.Empty;
+			if (param == null)
+				param = string.Empty;
 
 			// Generic template items.
 			if (template.Contains("<%year%>"))
@@ -146,7 +148,7 @@ namespace VHDLCodeGen
 					template = template.Replace("<%copyright%>", string.Empty); // Avoid an infinite loop.
 				else
 				{
-					string copyRight = ConvertTemplateLineToActual(DefaultValues.CopyrightTemplate, fileName, description, true, isLicense);
+					string copyRight = ConvertTemplateLineToActual(DefaultValues.CopyrightTemplate, fileName, description, param, true, isLicense);
 					template = template.Replace("<%copyright%>", copyRight);
 				}
 			}
@@ -158,7 +160,7 @@ namespace VHDLCodeGen
 				{
 					StringBuilder sb = new StringBuilder();
 					foreach (string line in DefaultValues.LicenseTemplate)
-						sb.AppendLine(ConvertTemplateLineToActual(line, fileName, description, isCopyRight, true));
+						sb.AppendLine(ConvertTemplateLineToActual(line, fileName, description, param, isCopyRight, true));
 					template = template.Replace("<%license%>", sb.ToString());
 				}
 			}
@@ -169,6 +171,17 @@ namespace VHDLCodeGen
 				template = template.Replace("<%filename%>", fileName);
 			if (template.Contains("<%description%>"))
 				template = template.Replace("<%description%>", description);
+
+			// Item Specific items.
+			if(template.Contains("<%param%>"))
+				template = template.Replace("<%param%>", param);
+
+			int index = template.IndexOf("<%flowerfill%>");
+			while(index != -1)
+			{
+				template = template.Replace("<%flowerfill%>", GenerateRemainingFlowerLine(index + previousCharacters));
+				index = template.IndexOf("<%flowerfill%>");
+			}
 
 			return template;
 		}
@@ -563,7 +576,7 @@ namespace VHDLCodeGen
 			// Write the copyright statement line.
 			if (DefaultValues.CopyrightTemplate != null && DefaultValues.CopyrightTemplate.Length > 0)
 			{
-				WriteLine(wr, string.Format("-- {0}", ConvertTemplateLineToActual(DefaultValues.CopyrightTemplate, fileName, description, true)), 0);
+				WriteLine(wr, string.Format("-- {0}", ConvertTemplateLineToActual(DefaultValues.CopyrightTemplate, fileName, description, null, true)), 0);
 			}
 
 			// Write the license section.
@@ -697,7 +710,7 @@ namespace VHDLCodeGen
 		}
 
 		/// <summary>
-		///   Writes the region start line.
+		///   Writes the region lines.
 		/// </summary>
 		/// <param name="wr"><see cref="StreamWriter"/> object to write the text to.</param>
 		/// <param name="nameOfRegion">Name of the region.</param>
@@ -705,7 +718,7 @@ namespace VHDLCodeGen
 		/// <exception cref="ArgumentNullException"><paramref name="wr"/> or <paramref name="nameOfRegion"/> is a null reference.</exception>
 		/// <exception cref="ArgumentException"><paramref name="nameOfRegion"/> is an empty string.</exception>
 		/// <exception cref="IOException">An error occurred while writing to the <see cref="StreamWriter"/> object.</exception>
-		public static void WriteRegionStart(StreamWriter wr, string nameOfRegion, int indentOffset)
+		private static void WriteRegion(StreamWriter wr, string nameOfRegion, int indentOffset, string[] templateLines)
 		{
 			if (wr == null)
 				throw new ArgumentNullException("wr");
@@ -716,27 +729,49 @@ namespace VHDLCodeGen
 
 			int wsLength;
 			string ws = GenerateLeadingWhitespace(indentOffset, out wsLength);
-			int middleIndex = ((DefaultValues.NumCharactersPerLine - wsLength) / 2) - 1;
-			int startIndex = middleIndex - ((nameOfRegion.Length + 2) / 2) + wsLength;
-
-			StringBuilder sb = new StringBuilder();
-			sb.Append("--"); // Start of line.
-
-			int index = wsLength + 2;
-			for (int i = index; i < startIndex; i++)
+			if (templateLines != null && templateLines.Length != 0)
 			{
-				sb.Append(DefaultValues.FlowerBoxCharacter);
-				index++;
+				foreach (string line in templateLines)
+				{
+					if (string.IsNullOrEmpty(line))
+					{
+						wr.WriteLine();
+					}
+					else
+					{
+						wr.Write(ws);
+						wr.WriteLine(ConvertTemplateLineToActual(line, null, null, nameOfRegion, false, false, wsLength));
+					}
+				}
 			}
+		}
 
-			// Add the word with spaces on each side.
-			sb.AppendFormat(" {0} ", nameOfRegion);
-			index += nameOfRegion.Length + 2;
+		/// <summary>
+		///   Writes the region end lines.
+		/// </summary>
+		/// <param name="wr"><see cref="StreamWriter"/> object to write the text to.</param>
+		/// <param name="nameOfRegion">Name of the region.</param>
+		/// <param name="indentOffset">Number of indentations to include before the text.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="wr"/> or <paramref name="nameOfRegion"/> is a null reference.</exception>
+		/// <exception cref="ArgumentException"><paramref name="nameOfRegion"/> is an empty string.</exception>
+		/// <exception cref="IOException">An error occurred while writing to the <see cref="StreamWriter"/> object.</exception>
+		public static void WriteRegionEnd(StreamWriter wr, string nameOfRegion, int indentOffset)
+		{
+			WriteRegion(wr, nameOfRegion, indentOffset, DefaultValues.SectionEndTemplate);
+		}
 
-			for (int i = index; i < DefaultValues.NumCharactersPerLine; i++)
-				sb.Append(DefaultValues.FlowerBoxCharacter);
-
-			WriteLine(wr, sb.ToString(), indentOffset);
+		/// <summary>
+		///   Writes the region start lines.
+		/// </summary>
+		/// <param name="wr"><see cref="StreamWriter"/> object to write the text to.</param>
+		/// <param name="nameOfRegion">Name of the region.</param>
+		/// <param name="indentOffset">Number of indentations to include before the text.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="wr"/> or <paramref name="nameOfRegion"/> is a null reference.</exception>
+		/// <exception cref="ArgumentException"><paramref name="nameOfRegion"/> is an empty string.</exception>
+		/// <exception cref="IOException">An error occurred while writing to the <see cref="StreamWriter"/> object.</exception>
+		public static void WriteRegionStart(StreamWriter wr, string nameOfRegion, int indentOffset)
+		{
+			WriteRegion(wr, nameOfRegion, indentOffset, DefaultValues.SectionStartTemplate);
 		}
 
 		/// <summary>

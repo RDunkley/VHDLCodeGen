@@ -44,7 +44,71 @@ namespace VHDLCodeGen
 		/// <summary>
 		///   Template for the copyright statement.
 		/// </summary>
-		/// <remarks>This line is wrapped if needed.</remarks>
+		/// <remarks>
+		///   No leading comments are required. This line is wrapped if needed. The following tags can be used in the copyright template.
+		///   <list type="bullet">
+		///     <item>
+		///       <term>&lt;%year%&gt;</code></term>
+		///       <description>Replaced with the current year.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%date%&gt;</code></term>
+		///       <description>Replaced with the current date.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%time%&gt;</code></term>
+		///       <description>Replaced with the current time.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%datetime%&gt;</code></term>
+		///       <description>Replaced with the current date and time.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%developer%&gt;</code></term>
+		///       <description>Replaced with the Developer's Name (as specified in the DefaultValues properties).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%company%&gt;</code></term>
+		///       <description>Replaced with the Company Name (as specified in the DefaultValues properties).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%appversion%&gt;</code></term>
+		///       <description>Replaced with the calling application's version.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%appname%&gt;</code></term>
+		///       <description>Replaced with the calling application's name.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%libraryversion%&gt;</code></term>
+		///       <description>Replaced with the CSCodeGen library version.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%libraryname%&gt;</code></term>
+		///       <description>Replaced with the CSCodeGen library name.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%copyright%&gt;</code></term>
+		///       <description>Replaced with the copyright statement (cannot be cyclic).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%license%&gt;</code></term>
+		///       <description>Replaced with the license statement (cannot be cyclic).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%filename%&gt;</code></term>
+		///       <description>Replaced with the file name being generated.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%description%&gt;</code></term>
+		///       <description>Replaced with a description of the file being generated.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%flowerfill%&gt;</code></term>
+		///       <description>Fills the rest of the line with the flower box character. Should be specified at end of line unless automatic wrapping occurs.</description>
+		///     </item>
+		///   </list>
+		/// </remarks>
 		public static string CopyrightTemplate { get; set; }
 
 		/// <summary>
@@ -56,7 +120,71 @@ namespace VHDLCodeGen
 		///   Template for the file information header.
 		/// </summary>
 		/// <remarks>
-		///   These lines should not exceed <see cref="NumCharactersPerLine"/> since the lines will not be wrapped.
+		///   These lines should not exceed <see cref="NumCharactersPerLine"/> since the lines will not be wrapped. The starting comment lines should 
+		///   be added to the template since this template is dropped directly in as the header after tag conversion. The following tags can be used in
+		///   the file information template.
+		///   <list type="bullet">
+		///     <item>
+		///       <term>&lt;%year%&gt;</code></term>
+		///       <description>Replaced with the current year.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%date%&gt;</code></term>
+		///       <description>Replaced with the current date.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%time%&gt;</code></term>
+		///       <description>Replaced with the current time.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%datetime%&gt;</code></term>
+		///       <description>Replaced with the current date and time.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%developer%&gt;</code></term>
+		///       <description>Replaced with the Developer's Name (as specified in the DefaultValues properties).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%company%&gt;</code></term>
+		///       <description>Replaced with the Company Name (as specified in the DefaultValues properties).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%appversion%&gt;</code></term>
+		///       <description>Replaced with the calling application's version.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%appname%&gt;</code></term>
+		///       <description>Replaced with the calling application's name.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%libraryversion%&gt;</code></term>
+		///       <description>Replaced with the CSCodeGen library version.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%libraryname%&gt;</code></term>
+		///       <description>Replaced with the CSCodeGen library name.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%copyright%&gt;</code></term>
+		///       <description>Replaced with the copyright statement (cannot be cyclic).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%license%&gt;</code></term>
+		///       <description>Replaced with the license statement (cannot be cyclic).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%filename%&gt;</code></term>
+		///       <description>Replaced with the file name being generated.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%description%&gt;</code></term>
+		///       <description>Replaced with a description of the file being generated.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%flowerfill%&gt;</code></term>
+		///       <description>Fills the rest of the line with the flower box character. Should be specified at end of line unless automatic wrapping occurs.</description>
+		///     </item>
+		///   </list>
 		/// </remarks>
 		public static string[] FileInfoTemplate { get; set; }
 
@@ -84,13 +212,213 @@ namespace VHDLCodeGen
 		/// <summary>
 		///   Template for the auto-generated code license.
 		/// </summary>
-		/// <remarks>This line is wrapped if needed.</remarks>
+		/// <remarks>
+		///   No leading comments are required. This line is wrapped if needed. The following tags can be used in the license template.
+		///   <list type="bullet">
+		///     <item>
+		///       <term>&lt;%year%&gt;</code></term>
+		///       <description>Replaced with the current year.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%date%&gt;</code></term>
+		///       <description>Replaced with the current date.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%time%&gt;</code></term>
+		///       <description>Replaced with the current time.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%datetime%&gt;</code></term>
+		///       <description>Replaced with the current date and time.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%developer%&gt;</code></term>
+		///       <description>Replaced with the Developer's Name (as specified in the DefaultValues properties).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%company%&gt;</code></term>
+		///       <description>Replaced with the Company Name (as specified in the DefaultValues properties).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%appversion%&gt;</code></term>
+		///       <description>Replaced with the calling application's version.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%appname%&gt;</code></term>
+		///       <description>Replaced with the calling application's name.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%libraryversion%&gt;</code></term>
+		///       <description>Replaced with the CSCodeGen library version.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%libraryname%&gt;</code></term>
+		///       <description>Replaced with the CSCodeGen library name.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%copyright%&gt;</code></term>
+		///       <description>Replaced with the copyright statement (cannot be cyclic).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%license%&gt;</code></term>
+		///       <description>Replaced with the license statement (cannot be cyclic).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%filename%&gt;</code></term>
+		///       <description>Replaced with the file name being generated.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%description%&gt;</code></term>
+		///       <description>Replaced with a description of the file being generated.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%flowerfill%&gt;</code></term>
+		///       <description>Fills the rest of the line with the flower box character. Should be specified at end of line unless automatic wrapping occurs.</description>
+		///     </item>
+		///   </list>
+		/// </remarks>
 		public static string[] LicenseTemplate { get; set; }
 
 		/// <summary>
 		///   Number of characters allowed per line. This only restricts documentation lines.
 		/// </summary>
 		public static int NumCharactersPerLine { get; set; }
+
+		/// <summary>
+		///   Template for the section start identifier.
+		/// </summary>
+		/// <remarks>
+		///   These lines should be written for variable length lines since they may start indented (use flower fill). The starting comment on
+		///   each line should be added as well since these lines are used directly after tag conversion. The following tags can be
+		///   used in the section identifier template:
+		///   <list type="bullet">
+		///     <item>
+		///       <term>&lt;%year%&gt;</code></term>
+		///       <description>Replaced with the current year.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%date%&gt;</code></term>
+		///       <description>Replaced with the current date.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%time%&gt;</code></term>
+		///       <description>Replaced with the current time.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%datetime%&gt;</code></term>
+		///       <description>Replaced with the current date and time.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%developer%&gt;</code></term>
+		///       <description>Replaced with the Developer's Name (as specified in the DefaultValues properties).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%company%&gt;</code></term>
+		///       <description>Replaced with the Company Name (as specified in the DefaultValues properties).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%appversion%&gt;</code></term>
+		///       <description>Replaced with the calling application's version.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%appname%&gt;</code></term>
+		///       <description>Replaced with the calling application's name.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%libraryversion%&gt;</code></term>
+		///       <description>Replaced with the CSCodeGen library version.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%libraryname%&gt;</code></term>
+		///       <description>Replaced with the CSCodeGen library name.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%copyright%&gt;</code></term>
+		///       <description>Replaced with the copyright statement (cannot be cyclic).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%license%&gt;</code></term>
+		///       <description>Replaced with the license statement (cannot be cyclic).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%param%&gt;</code></term>
+		///       <description>Replaced with the name of the section.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%flowerfill%&gt;</code></term>
+		///       <description>Fills the rest of the line with the flower box character. Should be specified at end of line unless automatic wrapping occurs.</description>
+		///     </item>
+		///   </list>
+		/// </remarks>
+		public static string[] SectionStartTemplate { get; set; }
+
+		/// <summary>
+		///   Template for the section stop identifier.
+		/// </summary>
+		/// <remarks>
+		///   These lines should be written for variable length lines since they may start indented (use flower fill). The starting comment on
+		///   each line should be added as well since these lines are used directly after tag conversion. The following tags can be
+		///   used in the section identifier template:
+		///   <list type="bullet">
+		///     <item>
+		///       <term>&lt;%year%&gt;</code></term>
+		///       <description>Replaced with the current year.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%date%&gt;</code></term>
+		///       <description>Replaced with the current date.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%time%&gt;</code></term>
+		///       <description>Replaced with the current time.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%datetime%&gt;</code></term>
+		///       <description>Replaced with the current date and time.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%developer%&gt;</code></term>
+		///       <description>Replaced with the Developer's Name (as specified in the DefaultValues properties).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%company%&gt;</code></term>
+		///       <description>Replaced with the Company Name (as specified in the DefaultValues properties).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%appversion%&gt;</code></term>
+		///       <description>Replaced with the calling application's version.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%appname%&gt;</code></term>
+		///       <description>Replaced with the calling application's name.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%libraryversion%&gt;</code></term>
+		///       <description>Replaced with the CSCodeGen library version.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%libraryname%&gt;</code></term>
+		///       <description>Replaced with the CSCodeGen library name.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%copyright%&gt;</code></term>
+		///       <description>Replaced with the copyright statement (cannot be cyclic).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%license%&gt;</code></term>
+		///       <description>Replaced with the license statement (cannot be cyclic).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%param%&gt;</code></term>
+		///       <description>Replaced with the name of the section.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%flowerfill%&gt;</code></term>
+		///       <description>Fills the rest of the line with the flower box character. Should be specified at end of line unless automatic wrapping occurs.</description>
+		///     </item>
+		///   </list>
+		/// </remarks>
+		public static string[] SectionEndTemplate { get; set; }
 
 		/// <summary>
 		///   Number of spaces per tab.
@@ -136,6 +464,8 @@ namespace VHDLCodeGen
 			FileInfoTemplate = GenerateFileInfoTemplate();
 			CopyrightTemplate = GenerateCopyrightTemplate();
 			LicenseTemplate = GenerateLicenseTemplate();
+			SectionStartTemplate = GenerateSectionStartTemplate();
+			SectionEndTemplate = GenerateSectionEndTemplate();
 			IncludeSubHeader = true;
 		}
 
@@ -169,6 +499,71 @@ namespace VHDLCodeGen
 		///   Generates a default Copyright template.
 		/// </summary>
 		/// <returns>Array of the lines in the template.</returns>
+		/// <remarks>
+		///   The following tags can be used in the copyright template.
+		///   <list type="bullet">
+		///     <item>
+		///       <term>&lt;%year%&gt;</code></term>
+		///       <description>Replaced with the current year.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%date%&gt;</code></term>
+		///       <description>Replaced with the current date.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%time%&gt;</code></term>
+		///       <description>Replaced with the current time.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%datetime%&gt;</code></term>
+		///       <description>Replaced with the current date and time.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%developer%&gt;</code></term>
+		///       <description>Replaced with the Developer's Name (as specified in the DefaultValues properties).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%company%&gt;</code></term>
+		///       <description>Replaced with the Company Name (as specified in the DefaultValues properties).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%appversion%&gt;</code></term>
+		///       <description>Replaced with the calling application's version.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%appname%&gt;</code></term>
+		///       <description>Replaced with the calling application's name.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%libraryversion%&gt;</code></term>
+		///       <description>Replaced with the CSCodeGen library version.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%libraryname%&gt;</code></term>
+		///       <description>Replaced with the CSCodeGen library name.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%copyright%&gt;</code></term>
+		///       <description>Replaced with the copyright statement (cannot be cyclic).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%license%&gt;</code></term>
+		///       <description>Replaced with the license statement (cannot be cyclic).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%filename%&gt;</code></term>
+		///       <description>Replaced with the file name being generated.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%description%&gt;</code></term>
+		///       <description>Replaced with a description of the file being generated.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%flowerfill%&gt;</code></term>
+		///       <description>Fills the rest of the line with the flower box character. Should be specified at end of line unless automatic wrapping occurs.</description>
+		///     </item>
+		///   </list>
+		/// </remarks>
 		private static string GenerateCopyrightTemplate()
 		{
 			return "Copyright © <%developer%> <%year%>";
@@ -178,6 +573,71 @@ namespace VHDLCodeGen
 		///   Generates a default file information template.
 		/// </summary>
 		/// <returns>Array of the lines in the template.</returns>
+		/// <remarks>
+		///   The following tags can be used in the file information template.
+		///   <list type="bullet">
+		///     <item>
+		///       <term>&lt;%year%&gt;</code></term>
+		///       <description>Replaced with the current year.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%date%&gt;</code></term>
+		///       <description>Replaced with the current date.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%time%&gt;</code></term>
+		///       <description>Replaced with the current time.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%datetime%&gt;</code></term>
+		///       <description>Replaced with the current date and time.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%developer%&gt;</code></term>
+		///       <description>Replaced with the Developer's Name (as specified in the DefaultValues properties).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%company%&gt;</code></term>
+		///       <description>Replaced with the Company Name (as specified in the DefaultValues properties).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%appversion%&gt;</code></term>
+		///       <description>Replaced with the calling application's version.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%appname%&gt;</code></term>
+		///       <description>Replaced with the calling application's name.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%libraryversion%&gt;</code></term>
+		///       <description>Replaced with the CSCodeGen library version.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%libraryname%&gt;</code></term>
+		///       <description>Replaced with the CSCodeGen library name.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%copyright%&gt;</code></term>
+		///       <description>Replaced with the copyright statement (cannot be cyclic).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%license%&gt;</code></term>
+		///       <description>Replaced with the license statement (cannot be cyclic).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%filename%&gt;</code></term>
+		///       <description>Replaced with the file name being generated.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%description%&gt;</code></term>
+		///       <description>Replaced with a description of the file being generated.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%flowerfill%&gt;</code></term>
+		///       <description>Fills the rest of the line with the flower box character. Should be specified at end of line unless automatic wrapping occurs.</description>
+		///     </item>
+		///   </list>
+		/// </remarks>
 		private static string[] GenerateFileInfoTemplate()
 		{
 			List<string> template = new List<string>();
@@ -192,6 +652,71 @@ namespace VHDLCodeGen
 		///   Generates a default license template.
 		/// </summary>
 		/// <returns>Array of the lines in the template.</returns>
+		/// <remarks>
+		///   The following tags can be used in the license template.
+		///   <list type="bullet">
+		///     <item>
+		///       <term>&lt;%year%&gt;</code></term>
+		///       <description>Replaced with the current year.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%date%&gt;</code></term>
+		///       <description>Replaced with the current date.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%time%&gt;</code></term>
+		///       <description>Replaced with the current time.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%datetime%&gt;</code></term>
+		///       <description>Replaced with the current date and time.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%developer%&gt;</code></term>
+		///       <description>Replaced with the Developer's Name (as specified in the DefaultValues properties).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%company%&gt;</code></term>
+		///       <description>Replaced with the Company Name (as specified in the DefaultValues properties).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%appversion%&gt;</code></term>
+		///       <description>Replaced with the calling application's version.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%appname%&gt;</code></term>
+		///       <description>Replaced with the calling application's name.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%libraryversion%&gt;</code></term>
+		///       <description>Replaced with the CSCodeGen library version.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%libraryname%&gt;</code></term>
+		///       <description>Replaced with the CSCodeGen library name.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%copyright%&gt;</code></term>
+		///       <description>Replaced with the copyright statement (cannot be cyclic).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%license%&gt;</code></term>
+		///       <description>Replaced with the license statement (cannot be cyclic).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%filename%&gt;</code></term>
+		///       <description>Replaced with the file name being generated.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%description%&gt;</code></term>
+		///       <description>Replaced with a description of the file being generated.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%flowerfill%&gt;</code></term>
+		///       <description>Fills the rest of the line with the flower box character. Should be specified at end of line unless automatic wrapping occurs.</description>
+		///     </item>
+		///   </list>
+		/// </remarks>
 		private static string[] GenerateLicenseTemplate()
 		{
 			List<string> template = new List<string>();
@@ -213,6 +738,148 @@ namespace VHDLCodeGen
 			//template.Add("	<%filename%> - Replaced with the file name being generated.");
 			//template.Add("	<%description%> - Replaced with a description of the file being generated.");
 			return template.ToArray();
+		}
+
+		/// <summary>
+		///   Generates a default section start header.
+		/// </summary>
+		/// <returns>Array of the lines in the template.</returns>
+		/// <remarks>
+		///   The following tags can be used in the license template.
+		///   <list type="bullet">
+		///     <item>
+		///       <term>&lt;%year%&gt;</code></term>
+		///       <description>Replaced with the current year.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%date%&gt;</code></term>
+		///       <description>Replaced with the current date.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%time%&gt;</code></term>
+		///       <description>Replaced with the current time.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%datetime%&gt;</code></term>
+		///       <description>Replaced with the current date and time.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%developer%&gt;</code></term>
+		///       <description>Replaced with the Developer's Name (as specified in the DefaultValues properties).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%company%&gt;</code></term>
+		///       <description>Replaced with the Company Name (as specified in the DefaultValues properties).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%appversion%&gt;</code></term>
+		///       <description>Replaced with the calling application's version.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%appname%&gt;</code></term>
+		///       <description>Replaced with the calling application's name.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%libraryversion%&gt;</code></term>
+		///       <description>Replaced with the CSCodeGen library version.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%libraryname%&gt;</code></term>
+		///       <description>Replaced with the CSCodeGen library name.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%copyright%&gt;</code></term>
+		///       <description>Replaced with the copyright statement (cannot be cyclic).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%license%&gt;</code></term>
+		///       <description>Replaced with the license statement (cannot be cyclic).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%param%&gt;</code></term>
+		///       <description>Replaced with the name of the section.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%flowerfill%&gt;</code></term>
+		///       <description>Fills the rest of the line with the flower box character. Should be specified at end of line unless automatic wrapping occurs.</description>
+		///     </item>
+		///   </list>
+		/// </remarks>
+		private static string[] GenerateSectionStartTemplate()
+		{
+			List<string> template = new List<string>();
+			template.Add("------------------------------------------------ <%param%> <%flowerfill%>");
+			return template.ToArray();
+		}
+
+		/// <summary>
+		///   Generates a default section start header.
+		/// </summary>
+		/// <returns>Array of the lines in the template.</returns>
+		/// <remarks>
+		///   The following tags can be used in the license template.
+		///   <list type="bullet">
+		///     <item>
+		///       <term>&lt;%year%&gt;</code></term>
+		///       <description>Replaced with the current year.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%date%&gt;</code></term>
+		///       <description>Replaced with the current date.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%time%&gt;</code></term>
+		///       <description>Replaced with the current time.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%datetime%&gt;</code></term>
+		///       <description>Replaced with the current date and time.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%developer%&gt;</code></term>
+		///       <description>Replaced with the Developer's Name (as specified in the DefaultValues properties).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%company%&gt;</code></term>
+		///       <description>Replaced with the Company Name (as specified in the DefaultValues properties).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%appversion%&gt;</code></term>
+		///       <description>Replaced with the calling application's version.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%appname%&gt;</code></term>
+		///       <description>Replaced with the calling application's name.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%libraryversion%&gt;</code></term>
+		///       <description>Replaced with the CSCodeGen library version.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%libraryname%&gt;</code></term>
+		///       <description>Replaced with the CSCodeGen library name.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%copyright%&gt;</code></term>
+		///       <description>Replaced with the copyright statement (cannot be cyclic).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%license%&gt;</code></term>
+		///       <description>Replaced with the license statement (cannot be cyclic).</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%param%&gt;</code></term>
+		///       <description>Replaced with the name of the section.</description>
+		///     </item>
+		///     <item>
+		///       <term>&lt;%flowerfill%&gt;</code></term>
+		///       <description>Fills the rest of the line with the flower box character. Should be specified at end of line unless automatic wrapping occurs.</description>
+		///     </item>
+		///   </list>
+		/// </remarks>
+		private static string[] GenerateSectionEndTemplate()
+		{
+			return null; // No end section specified.
 		}
 
 		#endregion Methods

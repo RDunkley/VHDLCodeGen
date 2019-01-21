@@ -276,7 +276,7 @@ namespace VHDLCodeGen
 			list.AddRange(types);
 			list.Sort();
 
-			if(!string.IsNullOrWhiteSpace(regionName))
+			if (!string.IsNullOrWhiteSpace(regionName))
 				DocumentationHelper.WriteRegionStart(wr, regionName, indentOffset);
 			for (int i = 0; i < list.Count; i++)
 			{
@@ -284,6 +284,8 @@ namespace VHDLCodeGen
 				if (i != list.Count - 1)
 					DocumentationHelper.WriteLine(wr); // Leave a line between declarations.
 			}
+			if(!string.IsNullOrWhiteSpace(regionName))
+				DocumentationHelper.WriteRegionEnd(wr, regionName, indentOffset);
 		}
 
 		#endregion Methods

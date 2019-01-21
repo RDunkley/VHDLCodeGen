@@ -305,6 +305,7 @@ namespace VHDLCodeGen
 				if (i != sorted.Length - 1)
 					DocumentationHelper.WriteLine(wr); // Leave a line between declarations.
 			}
+			DocumentationHelper.WriteRegionEnd(wr, "Constants & Types", indentOffset);
 		}
 
 		#endregion Methods
