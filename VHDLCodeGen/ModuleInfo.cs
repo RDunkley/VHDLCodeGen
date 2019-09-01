@@ -206,7 +206,7 @@ namespace VHDLCodeGen
 				DocumentationHelper.WriteLine(wr);
 
 			// Components
-			ComponentInfo[] components = SubModule.GetUniqueComponents(SubModules);
+			ComponentInfo[] components = SubModule.GetUniqueComponents(SubModule.GetAllSubModules(this));
 			BaseTypeInfo.WriteBaseTypeInfos("Components", wr, components, indentOffset, Entity.Name, "module");
 			if (components.Length > 0)
 				DocumentationHelper.WriteLine(wr);

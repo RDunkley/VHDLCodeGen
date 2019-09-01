@@ -88,6 +88,7 @@ namespace VHDLCodeGen
 		/// </exception>
 		public NamedTypeList(IEnumerable<T> collection) : base(collection)
 		{
+			mLookup = new Dictionary<string, T>();
 			foreach (T info in collection)
 			{
 				if (mLookup.ContainsKey(info.Name))

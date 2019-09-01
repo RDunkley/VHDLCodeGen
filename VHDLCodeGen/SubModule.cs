@@ -91,6 +91,22 @@ namespace VHDLCodeGen
 			return components.ToArray();
 		}
 
+		public static SubModule[] GetAllSubModules(ModuleInfo module)
+		{
+			NamedTypeList<SubModule> subModules = new NamedTypeList<SubModule>(module.SubModules);
+			foreach (GenerateInfo subGen in module.Generates)
+				subModules.AddRange(GetSubModules(subGen));
+			return subModules.ToArray();
+		}
+
+		private static SubModule[] GetSubModules(GenerateInfo info)
+		{
+			NamedTypeList<SubModule> subModules = new NamedTypeList<SubModule>(info.SubModules);
+			foreach (GenerateInfo subGen in info.Generates)
+				subModules.AddRange(GetSubModules(subGen));
+			return subModules.ToArray();
+		}
+
 		/// <summary>
 		///   Validates that mappings have a one-to-one relationship.
 		/// </summary>
