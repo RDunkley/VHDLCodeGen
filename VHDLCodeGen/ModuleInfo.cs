@@ -154,7 +154,7 @@ namespace VHDLCodeGen
 			childList.AddRange(DeclaredTypes);
 			childList.AddRange(Functions);
 			childList.AddRange(Procedures);
-			childList.AddRange(SubModule.GetUniqueComponents(SubModules));
+			childList.AddRange(SubModule.GetUniqueComponents(SubModules, true));
 			childList.AddRange(Signals);
 			childList.AddRange(Aliases);
 			childList.AddRange(AttributeDeclarationInfo.GetUniqueAttributeDeclarations(Attributes));
@@ -206,7 +206,7 @@ namespace VHDLCodeGen
 				DocumentationHelper.WriteLine(wr);
 
 			// Components
-			ComponentInfo[] components = SubModule.GetUniqueComponents(SubModule.GetAllSubModules(this));
+			ComponentInfo[] components = SubModule.GetUniqueComponents(SubModule.GetAllSubModules(this), true);
 			BaseTypeInfo.WriteBaseTypeInfos("Components", wr, components, indentOffset, Entity.Name, "module");
 			if (components.Length > 0)
 				DocumentationHelper.WriteLine(wr);

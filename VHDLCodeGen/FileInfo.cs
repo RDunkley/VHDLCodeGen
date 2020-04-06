@@ -195,7 +195,7 @@ namespace VHDLCodeGen
 				info.SubModules.Sort();
 
 			// Add Components.
-			ComponentInfo[] components = SubModule.GetUniqueComponents(info.SubModules);
+			ComponentInfo[] components = SubModule.GetUniqueComponents(info.SubModules, true);
 			if (components.Length > 0)
 				lookup.Add("Components:", GenerateNamesFromBaseTypeInfo(components));
 

@@ -44,6 +44,12 @@ namespace VHDLCodeGen
 		/// </summary>
 		public NamedTypeLookup<SimplifiedPortInfo, string> ConversionMap { get; private set; }
 
+		/// <summary>
+		///   If this value is null, the sub-module will use component instantiation since the configuration is
+		///   currently unknown. If it is set it will use direct instantiation based on this configuration name.
+		/// </summary>
+		public string ConfigurationName { get; set; }
+
 		#endregion Properties
 
 		#region Methods
@@ -55,9 +61,12 @@ namespace VHDLCodeGen
 		/// <param name="summary">Summary description of the sub-module.</param>
 		/// <param name="component"><see cref="ComponentInfo"/> object representing the component of the sub-module.</param>
 		/// <param name="remarks">Additional remarks to add to the documentation.</param>
+		/// <param name="configName">
+		///   Name of the configuration to use for direct instantiation. If this value is null, component instantiation will be used instead of direct.
+		/// </param>
 		/// <exception cref="ArgumentNullException"><paramref name="name"/>, <paramref name="component"/>, or <paramref name="summary"/> is a null reference.</exception>
 		/// <exception cref="ArgumentException"><paramref name="name"/>, or <paramref name="summary"/> is an empty string.</exception>
-		public SubModule(string name, string summary, ComponentInfo component, string remarks = null)
+		public SubModule(string name, string summary, ComponentInfo component, string remarks = null, string configName = null)
 			: base(name, summary, remarks)
 		{
 			if (component == null)
@@ -68,16 +77,20 @@ namespace VHDLCodeGen
 			GenericMap = new NamedTypeLookup<SimplifiedGenericInfo, string>(component.Generics);
 			PortMap = new NamedTypeLookup<SimplifiedPortInfo, string>(component.Ports);
 			ConversionMap = new NamedTypeLookup<SimplifiedPortInfo, string>(component.Ports);
+			ConfigurationName = configName;
 		}
 
 		/// <summary>
 		///   Gets all the unique components contained in the sub-modules.
 		/// </summary>
 		/// <param name="subModules"><see cref="SubModule"/>s to pull unique <see cref="ComponentInfo"/> base objects from.</param>
+		/// <param name="ignoreSkippedDeclationComponents">
+		///   True if the components that will be skipped for declarations should be ignored, false if they should not.
+		/// </param>
 		/// <returns>Array of unique components.</returns>
 		/// <remarks>This method determines uniqueness by the instance not by the <see cref="SubModule"/>'s name.</remarks>
 		/// <exception cref="ArgumentNullException"><paramref name="subModules"/> is a null reference.</exception>
-		public static ComponentInfo[] GetUniqueComponents(IEnumerable<SubModule> subModules)
+		public static ComponentInfo[] GetUniqueComponents(IEnumerable<SubModule> subModules, bool ignoreSkippedDeclationComponents = false)
 		{
 			if (subModules == null)
 				throw new ArgumentNullException("subModules");
@@ -85,8 +98,11 @@ namespace VHDLCodeGen
 			List<ComponentInfo> components = new List<ComponentInfo>();
 			foreach (SubModule mod in subModules)
 			{
-				if (!components.Contains(mod.Component))
-					components.Add(mod.Component);
+				if (!ignoreSkippedDeclationComponents || !mod.Component.SkipDeclaration)
+				{
+					if (!components.Contains(mod.Component))
+						components.Add(mod.Component);
+				}
 			}
 			return components.ToArray();
 		}
@@ -187,7 +203,17 @@ namespace VHDLCodeGen
 
 			// Write the header.
 			WriteBasicHeader(wr, indentOffset);
-			DocumentationHelper.WriteLine(wr, string.Format("{0}: {1}", Name, Component.Name), indentOffset);
+			if (ConfigurationName == null)
+			{
+				// Component instantiation.
+				DocumentationHelper.WriteLine(wr, string.Format("{0}: {1}", Name, Component.Name), indentOffset);
+			}
+			else
+			{
+				// Direct instantiation.
+				// TODO: We are assuming the current working library here. Do we want the library specified somewhere in the component. - RD
+				DocumentationHelper.WriteLine(wr, string.Format("{0}: entity work.{1}({2})", Name, Component.Name, ConfigurationName), indentOffset);
+			}
 
 			if (GenericMap.Count > 0)
 			{

@@ -251,3 +251,4 @@ paket-files/
 .idea/
 *.sln.iml
 /VHDLCodeGen/BaseTypeInfoList.1.cs
+/VHDLCodeGen/Xilinx/IP

@@ -49,10 +49,11 @@ namespace VHDLCodeGen
 		/// <param name="type">Type of the signal.</param>
 		/// <param name="summary">Summary description of the signal.</param>
 		/// <param name="defaultValue">Default value of the signal. Can be null or empty.</param>
+		/// <param name="addPreClockSignal">True if the signal represents the actual signal and a pre-clocked signal (Ex: sig, next_sig).</param>
 		/// <param name="remarks">Additional remarks to add to the documentation.</param>
 		/// <exception cref="ArgumentNullException"><paramref name="name"/>, <paramref name="type"/>, or <paramref name="summary"/> is a null reference.</exception>
 		/// <exception cref="ArgumentException"><paramref name="name"/>, <paramref name="type"/>, or <paramref name="summary"/> is an empty string.</exception>
-		public SignalInfo(string name, string type, string summary, string defaultValue = null, string remarks = null)
+		public SignalInfo(string name, string type, string summary, string defaultValue = null, string remarks = null, bool addPreClockSignal = false)
 			: base(name, summary, remarks)
 		{
 			if (type == null)
@@ -62,6 +63,7 @@ namespace VHDLCodeGen
 
 			Type = type;
 			DefaultValue = defaultValue;
+			AddPreClockSignal = addPreClockSignal;
 		}
 
 		/// <summary>

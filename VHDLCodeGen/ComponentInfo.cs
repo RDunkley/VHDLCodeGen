@@ -35,6 +35,11 @@ namespace VHDLCodeGen
 		/// </summary>
 		public NamedTypeList<SimplifiedPortInfo> Ports { get; private set; }
 
+		/// <summary>
+		///   True if the declaration of the component should be skipped, false if it should be created.
+		/// </summary>
+		public bool SkipDeclaration { get; private set; }
+
 		#endregion Properties
 
 		#region Methods
@@ -45,21 +50,30 @@ namespace VHDLCodeGen
 		/// <param name="name">Name of the component.</param>
 		/// <param name="summary">Summary description of the component.</param>
 		/// <param name="remarks">Additional remarks to add to the documentation.</param>
+		/// <param name="skipDeclaration">
+		///   True if the component should not be declared in the module, false if it should. True would be specified for components that
+		///   represent internal macros, primitives, or sub-modules that will be declared directly.
+		/// </param>
 		/// <exception cref="ArgumentNullException"><paramref name="name"/>, or <paramref name="summary"/> is a null reference.</exception>
 		/// <exception cref="ArgumentException"><paramref name="name"/>, or <paramref name="summary"/> is an empty string.</exception>
-		public ComponentInfo(string name, string summary, string remarks = null)
+		public ComponentInfo(string name, string summary, string remarks = null, bool skipDeclaration = false)
 			: base(name, summary, remarks)
 		{
 			Generics = new NamedTypeList<SimplifiedGenericInfo>();
 			Ports = new NamedTypeList<SimplifiedPortInfo>();
+			SkipDeclaration = skipDeclaration;
 		}
 
 		/// <summary>
 		///   Instantiates a new <see cref="ComponentInfo"/> object using a <see cref="EntityInfo"/> object.
 		/// </summary>
 		/// <param name="info"><see cref="EntityInfo"/> object to pull the component information from.</param>
+		/// <param name="skipDeclaration">
+		///   True if the component should not be declared in the module, false if it should. True would be specified for components that
+		///   represent internal macros, primitives, or sub-modules that will be declared directly.
+		/// </param>
 		/// <remarks>This constructor generates a component from an entity so that an entity can be used in another module.</remarks>
-		public ComponentInfo(EntityInfo info)
+		public ComponentInfo(EntityInfo info, bool skipDeclaration = false)
 			: base(info.Name, info.Summary, info.Remarks)
 		{
 			Generics = new NamedTypeList<SimplifiedGenericInfo>(info.Generics.Count);
@@ -69,6 +83,7 @@ namespace VHDLCodeGen
 			Ports = new NamedTypeList<SimplifiedPortInfo>(info.Ports.Count);
 			foreach (PortInfo port in info.Ports)
 				Ports.Add(new SimplifiedPortInfo(port.Name, port.Direction, port.Type, port.DefaultValue));
+			SkipDeclaration = skipDeclaration;
 		}
 
 		/// <summary>
@@ -83,6 +98,9 @@ namespace VHDLCodeGen
 		{
 			if (wr == null)
 				throw new ArgumentNullException("wr");
+
+			if (SkipDeclaration)
+				return;
 
 			if (indentOffset < 0)
 				indentOffset = 0;
