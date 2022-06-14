@@ -59,7 +59,7 @@ namespace VHDLCodeGen.ARM.AXI.Slave
 			if (item == null)
 				throw new ArgumentNullException(nameof(item));
 			if (item.FullRegisterWidth != RegisterWidth)
-				throw new ArgumentException($"The register value's width ({item.FullRegisterWidth}) is not equal to the collection's allowed width ({RegisterWidth}).", nameof(item));
+				throw new ArgumentException($"The register ({item.Name}) value's width ({item.FullRegisterWidth}) is not equal to the collection's allowed width ({RegisterWidth}).", nameof(item));
 			base.Add(item);
 		}
 

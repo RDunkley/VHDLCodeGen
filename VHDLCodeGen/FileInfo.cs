@@ -343,7 +343,7 @@ namespace VHDLCodeGen
 		/// <exception cref="ArgumentNullException"><paramref name="rootFolder"/> is a null reference.</exception>
 		/// <exception cref="ArgumentException"><paramref name="rootFolder"/> is not a valid folder path.</exception>
 		/// <exception cref="IOException">An error occurred while writing to the file.</exception>
-		public void WriteToFile(string rootFolder)
+		public void WriteToFile(string rootFolder, bool uppercaseFileName = true)
 		{
 			if (rootFolder == null)
 				throw new ArgumentNullException("rootFolder");
@@ -363,13 +363,16 @@ namespace VHDLCodeGen
 				fullFolderPath = Path.Combine(rootFolder, RelativePath);
 			else
 				fullFolderPath = rootFolder;
-			string fullPath = Path.Combine(fullFolderPath, FileName);
+			string fileName = FileName;
+			if (!uppercaseFileName)
+				fileName = FileName.ToLower();
+			string fullPath = Path.Combine(fullFolderPath, fileName);
 
 			// Generate any needed directories.
 			DefaultValues.CreateFolderPath(fullFolderPath);
 			using (StreamWriter wr = new StreamWriter(fullPath))
 			{
-				DocumentationHelper.WriteFileHeader(wr, FileName, Description);
+				DocumentationHelper.WriteFileHeader(wr, fileName, Description);
 
 				if (DefaultValues.IncludeSubHeader)
 					WriteFileSubHeader(wr);

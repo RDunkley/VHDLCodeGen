@@ -104,6 +104,11 @@ namespace VHDLCodeGen.ARM.AXI
 		/// </summary>
 		public int MaxAddressWidth { get; private set; }
 
+		/// <summary>
+		///   True if this interface is a single bus in the module, false if it is one of many.
+		/// </summary>
+		public bool SingleBus { get; private set; }
+
 		#endregion
 
 		#region SignalNames
@@ -139,6 +144,7 @@ namespace VHDLCodeGen.ARM.AXI
 			MinAddressWidth = minAddressWidth;
 			MaxAddressWidth = 32;
 			BusType = type;
+			SingleBus = singleBus;
 			if (string.IsNullOrEmpty(name))
 				Name = AXI.Utility.GetName(BusType);
 			else
@@ -146,7 +152,7 @@ namespace VHDLCodeGen.ARM.AXI
 
 			DataWidthAttributeName = Utility.GetDataWidthAttributeName(Name);
 			AddressWidthAttributeName = Utility.GetAddressWidthAttributeName(Name);
-			if (singleBus)
+			if (SingleBus)
 			{
 				ClockName = Utility.GetName(Signal.ACLK, BusType, string.Empty);
 				ResetName = Utility.GetName(Signal.ARESETN, BusType, string.Empty);
@@ -192,38 +198,38 @@ namespace VHDLCodeGen.ARM.AXI
 			if (includePorts)
 			{
 				if (IncludeClock)
-					entity.Ports.Add(Utility.GetPortInfo(Signal.ACLK, BusType, Name));
+					entity.Ports.Add(Utility.GetPortInfo(Signal.ACLK, BusType, Name, SingleBus));
 				if (IncludeReset)
-					entity.Ports.Add(Utility.GetPortInfo(Signal.ARESETN, BusType, Name));
+					entity.Ports.Add(Utility.GetPortInfo(Signal.ARESETN, BusType, Name, SingleBus));
 
 				// Write Address Channel
-				entity.Ports.Add(Utility.GetPortInfo(Signal.AWADDR, BusType, Name));
-				entity.Ports.Add(Utility.GetPortInfo(Signal.AWVALID, BusType, Name));
-				entity.Ports.Add(Utility.GetPortInfo(Signal.AWREADY, BusType, Name));
-				entity.Ports.Add(Utility.GetPortInfo(Signal.AWPROT, BusType, Name));
+				entity.Ports.Add(Utility.GetPortInfo(Signal.AWADDR, BusType, Name, SingleBus));
+				entity.Ports.Add(Utility.GetPortInfo(Signal.AWVALID, BusType, Name, SingleBus));
+				entity.Ports.Add(Utility.GetPortInfo(Signal.AWREADY, BusType, Name, SingleBus));
+				entity.Ports.Add(Utility.GetPortInfo(Signal.AWPROT, BusType, Name, SingleBus));
 
 				// Write Data Channel
-				entity.Ports.Add(Utility.GetPortInfo(Signal.WDATA, BusType, Name));
-				entity.Ports.Add(Utility.GetPortInfo(Signal.WVALID, BusType, Name));
-				entity.Ports.Add(Utility.GetPortInfo(Signal.WREADY, BusType, Name));
-				entity.Ports.Add(Utility.GetPortInfo(Signal.WSTRB, BusType, Name));
+				entity.Ports.Add(Utility.GetPortInfo(Signal.WDATA, BusType, Name, SingleBus));
+				entity.Ports.Add(Utility.GetPortInfo(Signal.WVALID, BusType, Name, SingleBus));
+				entity.Ports.Add(Utility.GetPortInfo(Signal.WREADY, BusType, Name, SingleBus));
+				entity.Ports.Add(Utility.GetPortInfo(Signal.WSTRB, BusType, Name, SingleBus));
 
 				// Write Response Channel
-				entity.Ports.Add(Utility.GetPortInfo(Signal.BRESP, BusType, Name));
-				entity.Ports.Add(Utility.GetPortInfo(Signal.BVALID, BusType, Name));
-				entity.Ports.Add(Utility.GetPortInfo(Signal.BREADY, BusType, Name));
+				entity.Ports.Add(Utility.GetPortInfo(Signal.BRESP, BusType, Name, SingleBus));
+				entity.Ports.Add(Utility.GetPortInfo(Signal.BVALID, BusType, Name, SingleBus));
+				entity.Ports.Add(Utility.GetPortInfo(Signal.BREADY, BusType, Name, SingleBus));
 
 				// Read Address Channel
-				entity.Ports.Add(Utility.GetPortInfo(Signal.ARADDR, BusType, Name));
-				entity.Ports.Add(Utility.GetPortInfo(Signal.ARVALID, BusType, Name));
-				entity.Ports.Add(Utility.GetPortInfo(Signal.ARREADY, BusType, Name));
-				entity.Ports.Add(Utility.GetPortInfo(Signal.ARPROT, BusType, Name));
+				entity.Ports.Add(Utility.GetPortInfo(Signal.ARADDR, BusType, Name, SingleBus));
+				entity.Ports.Add(Utility.GetPortInfo(Signal.ARVALID, BusType, Name, SingleBus));
+				entity.Ports.Add(Utility.GetPortInfo(Signal.ARREADY, BusType, Name, SingleBus));
+				entity.Ports.Add(Utility.GetPortInfo(Signal.ARPROT, BusType, Name, SingleBus));
 
 				// Read Data Channel
-				entity.Ports.Add(Utility.GetPortInfo(Signal.RDATA, BusType, Name));
-				entity.Ports.Add(Utility.GetPortInfo(Signal.RVALID, BusType, Name));
-				entity.Ports.Add(Utility.GetPortInfo(Signal.RREADY, BusType, Name));
-				entity.Ports.Add(Utility.GetPortInfo(Signal.RRESP, BusType, Name));
+				entity.Ports.Add(Utility.GetPortInfo(Signal.RDATA, BusType, Name, SingleBus));
+				entity.Ports.Add(Utility.GetPortInfo(Signal.RVALID, BusType, Name, SingleBus));
+				entity.Ports.Add(Utility.GetPortInfo(Signal.RREADY, BusType, Name, SingleBus));
+				entity.Ports.Add(Utility.GetPortInfo(Signal.RRESP, BusType, Name, SingleBus));
 			}
 		}
 
@@ -242,7 +248,7 @@ namespace VHDLCodeGen.ARM.AXI
 			{
 				mod.DeclaredTypes.Add(new DeclarationInfo(
 					DeclarationType.Constant,
-					Enum.GetName(typeof(Response), response),
+					$"C_{Enum.GetName(typeof(Response), response)}",
 					"std_logic_vector(1 downto 0)",
 					Utility.GetDescription(response),
 					VHDLUtility.GetBitString((ulong)response, 2, true),

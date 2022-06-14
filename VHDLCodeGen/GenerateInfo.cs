@@ -181,6 +181,35 @@ namespace VHDLCodeGen
 			}
 		}
 
+		/// <summary>
+		///   Gets all the components used by sub-modules and generate blocks.
+		/// </summary>
+		/// <returns>Array of unique <see cref="ComponentInfo"/> objects referenced. Can be empty.</returns>
+		public ComponentInfo[] GetAllUsedComponents()
+		{
+			List<ComponentInfo> comps = new List<ComponentInfo>();
+
+			// Check each submodule.
+			foreach (SubModule mod in SubModules)
+			{
+				if (!comps.Contains(mod.Component))
+					comps.Add(mod.Component);
+			}
+
+			// Check each generate.
+			foreach(GenerateInfo gen in Generates)
+			{
+				ComponentInfo[] genComps = gen.GetAllUsedComponents();
+				foreach(ComponentInfo comp in genComps)
+				{
+					if (!comps.Contains(comp))
+						comps.Add(comp);
+				}
+			}
+
+			return comps.ToArray();
+		}
+
 		#endregion Methods
 	}
 }
