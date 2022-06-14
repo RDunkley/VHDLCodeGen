@@ -207,7 +207,8 @@ namespace VHDLCodeGen
 			int numHexChars = numberOfBits / 4;
 			int remBits = numberOfBits % 4;
 
-			string hexString = value.ToString($"X{numHexChars}").Substring(0, numHexChars);
+			string hexString = value.ToString($"X{numHexChars}");
+			hexString = hexString.Substring(hexString.Length - numHexChars, numHexChars);
 			if (remBits == 0)
 				return $"x\"{hexString}\"";
 
@@ -216,8 +217,8 @@ namespace VHDLCodeGen
 
 			string remString = GetBitStringWithOnlySingleBits(value, numHexChars * 4, numberOfBits - 1);
 			if (string.IsNullOrEmpty(hexString))
-				return $"\"{remString}\"";
-			return $"\"{remString}\" & x\"{hexString}\"";
+				return $"{remString}";
+			return $"{remString} & x\"{hexString}\"";
 		}
 
 		/// <summary>
@@ -619,6 +620,59 @@ namespace VHDLCodeGen
 			// Add the last block.
 			returnBlocks.Add(new Tuple<ulong, int>(start, length));
 			return returnBlocks.ToArray();
+		}
+
+		/// <summary>
+		///   Generates a clock sync process to assign the next values of the signals to their registers.
+		/// </summary>
+		/// <param name="sigs">Array of <see cref="SignalInfo"/> objects to assign values to in the process.</param>
+		/// <param name="procName">Name of the process. If null, then 'CLK_SYNC' will be used.</param>
+		/// <param name="clockName">Name of the clock to drive the clock process.</param>
+		/// <param name="resetName">Name of the reset signal to reset the signal values. If null, then no reset will be added to the process.</param>
+		/// <param name="resetActiveLow">
+		///   True if the reset is active low, false if it is active high. Ignored if <paramref name="resetName"/> is null.
+		/// </param>
+		/// <returns><see cref="ProcedureInfo"/> containing the clock synchronization logic.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="sigs"/> or <paramref name="clockName"/> is null.</exception>
+		/// <exception cref="ArgumentException">One of <paramref name="sigs"/> does not have a pre-clock signal.</exception>
+		public static ProcessInfo GenerateClockSyncProcess(SignalInfo[] sigs, string procName, string clockName,
+			string resetName = null, bool resetActiveLow = true)
+		{
+			if (sigs == null)
+				throw new ArgumentNullException(nameof(sigs));
+			if (string.IsNullOrEmpty(clockName))
+				throw new ArgumentNullException(nameof(clockName));
+			if (string.IsNullOrEmpty(procName))
+				procName = "CLK_SYNC";
+
+			ProcessInfo procInfo = new ProcessInfo(procName, $"Registers the signals on the rising edge of {clockName}.");
+			procInfo.SensitivityList.Add(clockName);
+			procInfo.CodeLines.Add($"if(rising_edge({clockName})) then");
+			string indent = string.Empty;
+			if (!string.IsNullOrEmpty(resetName))
+			{
+				indent = "	";
+				if (resetActiveLow)
+					procInfo.CodeLines.Add($"	if({resetName} = '0') then");
+				else
+					procInfo.CodeLines.Add($"	if({resetName} = '1') then");
+				foreach (var sig in sigs)
+					procInfo.CodeLines.Add($"		{sig.Name} <= {sig.DefaultValue};");
+				procInfo.CodeLines.Add("	else");
+			}
+
+			// Assign the signal values.
+			foreach (var sig in sigs)
+			{
+				if (!sig.AddPreClockSignal)
+					throw new ArgumentException($"One of the signals in the list ({sig.Name}) does not have a pre-clock signal (next_{sig.Name}).");
+				procInfo.CodeLines.Add($"	{indent}{sig.Name} <= next_{sig.Name};");
+			}
+
+			if (!string.IsNullOrEmpty(resetName))
+				procInfo.CodeLines.Add("	end if;");
+			procInfo.CodeLines.Add("end if;");
+			return procInfo;
 		}
 
 		#endregion

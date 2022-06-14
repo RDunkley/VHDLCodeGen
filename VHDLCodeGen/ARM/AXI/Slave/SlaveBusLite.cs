@@ -66,6 +66,17 @@ namespace VHDLCodeGen.ARM.AXI.Slave
 		/// </summary>
 		public PartialRegisterInfoCollection Registers { get; private set; }
 
+		/// <summary>
+		///   When true, code will be generated to ensure there aren't unaligned transfers.
+		/// </summary>
+		/// <remarks>
+		///   The code this adds when true ensures the transaction address lower bits (bits 0 and 1) are zero when reading and writing.
+		///   It turns out the Zynq-7000 processor will align the data, but send unaligned addresses. The Xilinx generated IP cores ignore
+		///   the lower bits in the address. This value is set to false by default so that the check will not be created and the generated
+		///   code can run on the Zynq-7000. Unsure if the ZynqMP has the same problem or not.
+		/// </remarks>
+		public bool CheckForUnalignedTransfers { get; private set; } = false;
+
 		#endregion
 
 		#region Methods
@@ -172,8 +183,8 @@ namespace VHDLCodeGen.ARM.AXI.Slave
 			sb.Append(", sWaitResponse)");
 
 			// Create the state type and signals.
-			module.DeclaredTypes.Add(new DeclarationInfo(DeclarationType.Type, "READ_STATE_T", sb.ToString(), "Various states of the Read State Machine"));
-			module.Signals.Add(new SignalInfo("read_state", "READ_STATE_T", "Tracks the current state of the read state machine.", "sIdle"));
+			module.DeclaredTypes.Add(new DeclarationInfo(DeclarationType.Type, "READ_STATE_TYPE", sb.ToString(), "Various states of the Read State Machine"));
+			module.Signals.Add(new SignalInfo("read_state", "READ_STATE_TYPE", "Tracks the current state of the read state machine.", "sIdle"));
 
 			// Add the rest of the code.
 			proc.CodeLines.Add("	else");
@@ -192,10 +203,17 @@ namespace VHDLCodeGen.ARM.AXI.Slave
 			proc.CodeLines.Add("		case read_state is");
 			proc.CodeLines.Add("			when sIdle =>");
 			proc.CodeLines.Add($"				if({GetName(Signal.ARVALID)} = '1') then");
-			proc.CodeLines.Add($"					if({GetName(Signal.ARADDR)}({AddressLSB - 1} downto 0) /= {VHDLUtility.GetBitString(0, AddressLSB, true)}) then");
-			proc.CodeLines.Add("						-- Address does not fall on a register boundary so send a SLVERR response.");
-			proc.CodeLines.Add("						read_state <= sWaitResponse;");
-			proc.CodeLines.Add($"					elsif({AddressWidthAttributeName} > {MinAddressWidth} and unsigned({GetName(Signal.ARADDR)}({AddressWidthAttributeName}-1 downto {MinAddressWidth})) /= 0) then");
+			if (CheckForUnalignedTransfers)
+			{
+				proc.CodeLines.Add($"					if({GetName(Signal.ARADDR)}({AddressLSB - 1} downto 0) /= {VHDLUtility.GetBitString(0, AddressLSB, true)}) then");
+				proc.CodeLines.Add("						-- Address does not fall on a register boundary so send a SLVERR response.");
+				proc.CodeLines.Add("						read_state <= sWaitResponse;");
+				proc.CodeLines.Add($"					elsif({AddressWidthAttributeName} > {MinAddressWidth} and unsigned({GetName(Signal.ARADDR)}({AddressWidthAttributeName}-1 downto {MinAddressWidth})) /= 0) then");
+			}
+			else
+			{
+				proc.CodeLines.Add($"					if({AddressWidthAttributeName} > {MinAddressWidth} and unsigned({GetName(Signal.ARADDR)}({AddressWidthAttributeName}-1 downto {MinAddressWidth})) /= 0) then");
+			}
 			proc.CodeLines.Add("						-- The address is outside of the valid register space so just return the default value.");
 			proc.CodeLines.Add("						read_state <= sWaitResponse;");
 			proc.CodeLines.Add("					else");
@@ -260,7 +278,7 @@ namespace VHDLCodeGen.ARM.AXI.Slave
 		{
 			module.Signals.Add(new SignalInfo("rresp", "std_logic_vector(1 downto 0)", $"Registers the value to be sent on the {GetName(Signal.RRESP)} port.", "(others => '0')", null, true));
 			module.ConcurrentStatements.Add($"{GetName(Signal.RRESP)} <= rresp;");
-			//module.ConcurrentStatements.Add($"{GetName(Signal.RRESP)} <= OKAY;");
+			//module.ConcurrentStatements.Add($"{GetName(Signal.RRESP)} <= C_OKAY;");
 			module.Signals.Add(new SignalInfo("rvalid", "std_logic", $"Registers the value to be sent on the {GetName(Signal.RVALID)} port.", "'0'", null, true));
 			module.ConcurrentStatements.Add($"{GetName(Signal.RVALID)} <= rvalid;");
 			module.Signals.Add(new SignalInfo("rdata", $"std_logic_vector({DataWidthAttributeName}-1 downto 0)", $"The return value of the read transaction. Sent on the {GetName(Signal.RDATA)} port.", "(others => '0')", null, true));
@@ -279,14 +297,21 @@ namespace VHDLCodeGen.ARM.AXI.Slave
 			proc.SensitivityList.Add(GetName(Signal.ARVALID));
 			proc.SensitivityList.Add(GetName(Signal.ARADDR));
 			proc.CodeLines.Add($"		if({GetName(Signal.ARVALID)} = '1') then");
-			proc.CodeLines.Add($"			if({GetName(Signal.ARADDR)}({AddressLSB - 1} downto 0) /= {VHDLUtility.GetBitString(0, AddressLSB, true)}) then");
-			proc.CodeLines.Add("				-- The address does not fall on a register boundary so flag it as an error on the bus.");
-			proc.CodeLines.Add("				next_rresp <= SLVERR;");
-			proc.CodeLines.Add("				next_rvalid <= '1';");
-			proc.CodeLines.Add("				next_rdata <= (others => '0');");
-			proc.CodeLines.Add($"			elsif({AddressWidthAttributeName} > {MinAddressWidth} and unsigned({GetName(Signal.ARADDR)}({AddressWidthAttributeName}-1 downto {MinAddressWidth})) /= 0) then");
+			if (CheckForUnalignedTransfers)
+			{
+				proc.CodeLines.Add($"			if({GetName(Signal.ARADDR)}({AddressLSB - 1} downto 0) /= {VHDLUtility.GetBitString(0, AddressLSB, true)}) then");
+				proc.CodeLines.Add("				-- The address does not fall on a register boundary so flag it as an error on the bus.");
+				proc.CodeLines.Add("				next_rresp <= C_SLVERR;");
+				proc.CodeLines.Add("				next_rvalid <= '1';");
+				proc.CodeLines.Add("				next_rdata <= (others => '0');");
+				proc.CodeLines.Add($"			elsif({AddressWidthAttributeName} > {MinAddressWidth} and unsigned({GetName(Signal.ARADDR)}({AddressWidthAttributeName}-1 downto {MinAddressWidth})) /= 0) then");
+			}
+			else
+			{
+				proc.CodeLines.Add($"			if({AddressWidthAttributeName} > {MinAddressWidth} and unsigned({GetName(Signal.ARADDR)}({AddressWidthAttributeName}-1 downto {MinAddressWidth})) /= 0) then");
+			}
 			proc.CodeLines.Add("				-- The address is outside of the valid register space so just return the default value.");
-			proc.CodeLines.Add("				next_rresp <= OKAY;");
+			proc.CodeLines.Add("				next_rresp <= C_OKAY;");
 			proc.CodeLines.Add("				next_rvalid <= '1';");
 			proc.CodeLines.Add($"				next_rdata <= {VHDLUtility.GetBitString(DefaultRegisterValue, RegisterWidth, true)};");
 			proc.CodeLines.Add("			end if;");
@@ -300,7 +325,7 @@ namespace VHDLCodeGen.ARM.AXI.Slave
 					MemoryBlockInfo block = Memories[Access.Read, offset] as MemoryBlockInfo;
 					proc.CodeLines.Add($"	when {block.StateName} => -- {Memories[Access.Read, offset].Name}");
 					proc.CodeLines.Add("		if(count = C_MEM_LATENCY) then");
-					proc.CodeLines.Add("			next_rresp <= OKAY;");
+					proc.CodeLines.Add("			next_rresp <= C_OKAY;");
 					proc.CodeLines.Add("			next_rvalid <= '1';");
 					proc.SensitivityList.Add(block.MemoryOutputRegisterName);
 					proc.CodeLines.Add($"			next_rdata <= {block.MemoryOutputRegisterName};");
@@ -308,7 +333,7 @@ namespace VHDLCodeGen.ARM.AXI.Slave
 				}
 			}
 			proc.CodeLines.Add("	when sReadRegister =>");
-			proc.CodeLines.Add("		next_rresp <= OKAY;");
+			proc.CodeLines.Add("		next_rresp <= C_OKAY;");
 			proc.CodeLines.Add("		next_rvalid <= '1';");
 			bool first = true;
 			string start;
@@ -460,8 +485,8 @@ namespace VHDLCodeGen.ARM.AXI.Slave
 			int addr = MinAddressWidth - 1;
 			ProcessInfo proc = new ProcessInfo("WRITE_STATE_MACHINE", "Contains the logic to track the state of a write transaction on the AXI interface.");
 			proc.SensitivityList.Add(ClockName);
-			module.DeclaredTypes.Add(new DeclarationInfo(DeclarationType.Type, "WRITE_STATE_T", "(sIdle, sWaitAddress, sWaitData, sWaitResponse)", "Various states of the Write State Machine"));
-			module.Signals.Add(new SignalInfo("write_state", "WRITE_STATE_T", "Tracks the current state of the write state machine.", "sIdle"));
+			module.DeclaredTypes.Add(new DeclarationInfo(DeclarationType.Type, "WRITE_STATE_TYPE", "(sIdle, sWaitAddress, sWaitData, sWaitResponse)", "Various states of the Write State Machine"));
+			module.Signals.Add(new SignalInfo("write_state", "WRITE_STATE_TYPE", "Tracks the current state of the write state machine.", "sIdle"));
 
 			AddressableItemInfo[] writeableMemories = Memories.GetItems(Access.Write);
 			proc.CodeLines.Add($"if(rising_edge({ClockName})) then");
@@ -504,18 +529,25 @@ namespace VHDLCodeGen.ARM.AXI.Slave
 
 			proc.CodeLines.Add("		case write_state is");
 			proc.CodeLines.Add("			when sIdle =>");
-			proc.CodeLines.Add($"				if ({GetName(Signal.AWVALID)} = '1') then");
+			proc.CodeLines.Add($"				if({GetName(Signal.AWVALID)} = '1') then");
 			proc.CodeLines.Add("					-- Write Address Transaction.");
 			if (HasWriteableBlocks && (MinAddressWidth != AddressLSB))
 				proc.CodeLines.Add($"					write_address <= {GetName(Signal.AWADDR)}({addr} downto {AddressLSB});");
-			proc.CodeLines.Add($"					if ({GetName(Signal.WVALID)} = '1') then");
+			proc.CodeLines.Add($"					if({GetName(Signal.WVALID)} = '1') then");
 			proc.CodeLines.Add("						-- Write Data Transaction.");
 			if (HasWriteableBlocks)
 			{
-				proc.CodeLines.Add($"						if({GetName(Signal.AWADDR)}({AddressLSB - 1} downto 0) /= {VHDLUtility.GetBitString(0, AddressLSB, true)}) then");
-				proc.CodeLines.Add("							-- Address does not fall on a register boundary so flag an error on the bus.");
-				proc.CodeLines.Add("							write_state <= sWaitResponse;");
-				proc.CodeLines.Add($"						elsif({AddressWidthAttributeName} > {MinAddressWidth} and unsigned({GetName(Signal.AWADDR)}({AddressWidthAttributeName}-1 downto {MinAddressWidth})) /= 0) then");
+				if (CheckForUnalignedTransfers)
+				{
+					proc.CodeLines.Add($"						if({GetName(Signal.AWADDR)}({AddressLSB - 1} downto 0) /= {VHDLUtility.GetBitString(0, AddressLSB, true)}) then");
+					proc.CodeLines.Add("							-- Address does not fall on a register boundary so flag an error on the bus.");
+					proc.CodeLines.Add("							write_state <= sWaitResponse;");
+					proc.CodeLines.Add($"						elsif({AddressWidthAttributeName} > {MinAddressWidth} and unsigned({GetName(Signal.AWADDR)}({AddressWidthAttributeName}-1 downto {MinAddressWidth})) /= 0) then");
+				}
+				else
+				{
+					proc.CodeLines.Add($"						if({AddressWidthAttributeName} > {MinAddressWidth} and unsigned({GetName(Signal.AWADDR)}({AddressWidthAttributeName}-1 downto {MinAddressWidth})) /= 0) then");
+				}
 				proc.CodeLines.Add("							-- The address is outside of the valid register space so flag an error on the bus.");
 				proc.CodeLines.Add("							write_state <= sWaitResponse;");
 				proc.CodeLines.Add("						else");
@@ -533,7 +565,7 @@ namespace VHDLCodeGen.ARM.AXI.Slave
 			proc.CodeLines.Add("						write_state <= sWaitData;");
 			proc.CodeLines.Add("					end if;");
 			proc.CodeLines.Add("				else");
-			proc.CodeLines.Add($"					if ({GetName(Signal.WVALID)} = '1') then");
+			proc.CodeLines.Add($"					if({GetName(Signal.WVALID)} = '1') then");
 			proc.CodeLines.Add("						-- Write Data Transaction.");
 			if (HasWriteableBlocks)
 			{
@@ -544,13 +576,20 @@ namespace VHDLCodeGen.ARM.AXI.Slave
 			proc.CodeLines.Add("					end if;");
 			proc.CodeLines.Add("				end if;");
 			proc.CodeLines.Add("			when sWaitAddress =>");
-			proc.CodeLines.Add($"				if ({GetName(Signal.AWVALID)} = '1') then");
+			proc.CodeLines.Add($"				if({GetName(Signal.AWVALID)} = '1') then");
 			if (HasWriteableBlocks)
 			{
-				proc.CodeLines.Add($"					if({GetName(Signal.AWADDR)}({AddressLSB - 1} downto 0) /= {VHDLUtility.GetBitString(0, AddressLSB, true)}) then");
-				proc.CodeLines.Add("						-- Address does not fall on a register boundary so flag an error on the bus.");
-				proc.CodeLines.Add("						write_state <= sWaitResponse;");
-				proc.CodeLines.Add($"					elsif({AddressWidthAttributeName} > {MinAddressWidth} and unsigned({GetName(Signal.AWADDR)}({AddressWidthAttributeName}-1 downto {MinAddressWidth})) /= 0) then");
+				if (CheckForUnalignedTransfers)
+				{
+					proc.CodeLines.Add($"					if({GetName(Signal.AWADDR)}({AddressLSB - 1} downto 0) /= {VHDLUtility.GetBitString(0, AddressLSB, true)}) then");
+					proc.CodeLines.Add("						-- Address does not fall on a register boundary so flag an error on the bus.");
+					proc.CodeLines.Add("						write_state <= sWaitResponse;");
+					proc.CodeLines.Add($"					elsif({AddressWidthAttributeName} > {MinAddressWidth} and unsigned({GetName(Signal.AWADDR)}({AddressWidthAttributeName}-1 downto {MinAddressWidth})) /= 0) then");
+				}
+				else
+				{
+					proc.CodeLines.Add($"					if({AddressWidthAttributeName} > {MinAddressWidth} and unsigned({GetName(Signal.AWADDR)}({AddressWidthAttributeName}-1 downto {MinAddressWidth})) /= 0) then");
+				}
 				proc.CodeLines.Add("						-- The address is outside of the valid register space so flag an error on the bus.");
 				proc.CodeLines.Add("						write_state <= sWaitResponse;");
 				proc.CodeLines.Add("					else");
@@ -566,10 +605,10 @@ namespace VHDLCodeGen.ARM.AXI.Slave
 			}
 			proc.CodeLines.Add("				end if;");
 			proc.CodeLines.Add("			when sWaitData =>");
-			proc.CodeLines.Add($"				if ({GetName(Signal.WVALID)} = '1') then");
+			proc.CodeLines.Add($"				if({GetName(Signal.WVALID)} = '1') then");
 			if (HasWriteableBlocks)
 			{
-				proc.CodeLines.Add("					if (bresp = OKAY) then");
+				proc.CodeLines.Add("					if(bresp = C_OKAY) then");
 				proc.CodeLines.Add($"						write_data <= {GetName(Signal.WDATA)};");
 				proc.CodeLines.Add($"						write_strb <= {GetName(Signal.WSTRB)};");
 				GenerateWriteStateMachineComponentCode(proc, false, true);
@@ -578,7 +617,7 @@ namespace VHDLCodeGen.ARM.AXI.Slave
 			proc.CodeLines.Add("					write_state <= sWaitResponse;");
 			proc.CodeLines.Add("				end if;");
 			proc.CodeLines.Add("			when sWaitResponse =>");
-			proc.CodeLines.Add($"				if ({GetName(Signal.BREADY)} = '1') then");
+			proc.CodeLines.Add($"				if({GetName(Signal.BREADY)} = '1') then");
 			proc.CodeLines.Add("					write_state <= sIdle;");
 			proc.CodeLines.Add("				end if;");
 			proc.CodeLines.Add("		end case;");
@@ -669,8 +708,8 @@ namespace VHDLCodeGen.ARM.AXI.Slave
 			proc.CodeLines.Add("case write_state is");
 			proc.CodeLines.Add("	when sIdle =>");
 			proc.CodeLines.Add("		-- Assert the ready signals that are not currently being read on this clock cycle.");
-			proc.CodeLines.Add($"		if ({GetName(Signal.AWVALID)} = '1') then");
-			proc.CodeLines.Add($"			if ({GetName(Signal.WVALID)} = '1') then");
+			proc.CodeLines.Add($"		if({GetName(Signal.AWVALID)} = '1') then");
+			proc.CodeLines.Add($"			if({GetName(Signal.WVALID)} = '1') then");
 			proc.CodeLines.Add("				next_awready <= '0';");
 			proc.CodeLines.Add("				next_wready <= '0';");
 			proc.CodeLines.Add("			else");
@@ -678,7 +717,7 @@ namespace VHDLCodeGen.ARM.AXI.Slave
 			proc.CodeLines.Add("				next_wready <= '1';");
 			proc.CodeLines.Add("			end if;");
 			proc.CodeLines.Add("		else");
-			proc.CodeLines.Add($"			if ({GetName(Signal.WVALID)} = '1') then");
+			proc.CodeLines.Add($"			if({GetName(Signal.WVALID)} = '1') then");
 			proc.CodeLines.Add("				next_awready <= '1';");
 			proc.CodeLines.Add("				next_wready <= '0';");
 			proc.CodeLines.Add("			else");
@@ -687,15 +726,15 @@ namespace VHDLCodeGen.ARM.AXI.Slave
 			proc.CodeLines.Add("			end if;");
 			proc.CodeLines.Add("		end if;");
 			proc.CodeLines.Add("	when sWaitAddress =>");
-			proc.CodeLines.Add($"		if ({GetName(Signal.AWVALID)} = '1') then");
+			proc.CodeLines.Add($"		if({GetName(Signal.AWVALID)} = '1') then");
 			proc.CodeLines.Add("			next_awready <= '0';");
 			proc.CodeLines.Add("		end if;");
 			proc.CodeLines.Add("	when sWaitData =>");
-			proc.CodeLines.Add($"		if ({GetName(Signal.WVALID)} = '1') then");
+			proc.CodeLines.Add($"		if({GetName(Signal.WVALID)} = '1') then");
 			proc.CodeLines.Add("			next_wready <= '0';");
 			proc.CodeLines.Add("		end if;");
 			proc.CodeLines.Add("	when sWaitResponse =>");
-			proc.CodeLines.Add($"		if ({GetName(Signal.BREADY)} = '1') then");
+			proc.CodeLines.Add($"		if({GetName(Signal.BREADY)} = '1') then");
 			proc.CodeLines.Add("			next_awready <= '1';");
 			proc.CodeLines.Add("			next_wready <= '1';");
 			proc.CodeLines.Add("		end if;");
@@ -709,11 +748,11 @@ namespace VHDLCodeGen.ARM.AXI.Slave
 		/// <param name="info"><see cref="ModuleInfo"/> object to add the process to.</param>
 		private void GenerateWriteRegisterProcess(ModuleInfo info)
 		{
-			if (Registers.WriteCount == 0)
-				return;
+			ulong[] writeableOffsets = AddressibleItemCollection.GetUniqueOffsets(Access.Write, Registers, Notifications);
+			if (writeableOffsets.Length == 0)
+				return; // Nothing to add to write register.
 
 			ProcessInfo proc = new ProcessInfo("WRITE_REGISTER", "Contains the logic to handle writes to registers.");
-			ulong[] writeableOffsets = AddressibleItemCollection.GetUniqueOffsets(Access.Write, Registers, Notifications);
 			foreach (ulong offset in writeableOffsets)
 			{
 				AddressableItemInfo[] vals = Registers.GetItemsAtOffset(offset, Access.Write);
@@ -829,10 +868,10 @@ namespace VHDLCodeGen.ARM.AXI.Slave
 		/// <param name="module"><see cref="ModuleInfo"/> object to add the process to.</param>
 		private void GenerateWriteResponseProcess(ModuleInfo module)
 		{
-			if (Memories.WriteCount == 0 && Registers.WriteCount == 0)
+			if (Memories.WriteCount == 0 && Registers.WriteCount == 0 && Notifications.WriteCount == 0)
 			{
 				// Nothing is writeable so always return a SLVERR response.
-				module.ConcurrentStatements.Add($"{GetName(Signal.BRESP)} <= SLVERR;");
+				module.ConcurrentStatements.Add($"{GetName(Signal.BRESP)} <= C_SLVERR;");
 				return;
 			}
 
@@ -848,12 +887,19 @@ namespace VHDLCodeGen.ARM.AXI.Slave
 			proc.CodeLines.Add("next_bresp <= bresp;");
 			proc.CodeLines.Add("if(write_state = sIdle or write_state = sWaitAddress) then");
 			proc.CodeLines.Add($"	if({GetName(Signal.AWVALID)} = '1') then");
-			proc.CodeLines.Add($"		if({GetName(Signal.AWADDR)}({AddressLSB - 1} downto 0) /= {VHDLUtility.GetBitString(0, AddressLSB, true)}) then");
-			proc.CodeLines.Add("			-- Address does not fall on a register boundary so flag an error on the bus.");
-			proc.CodeLines.Add("			next_bresp <= SLVERR;");
-			proc.CodeLines.Add($"		elsif({AddressWidthAttributeName} > {MinAddressWidth} and unsigned({GetName(Signal.AWADDR)}({AddressWidthAttributeName}-1 downto {MinAddressWidth})) /= 0) then");
+			if (CheckForUnalignedTransfers)
+			{
+				proc.CodeLines.Add($"		if({GetName(Signal.AWADDR)}({AddressLSB - 1} downto 0) /= {VHDLUtility.GetBitString(0, AddressLSB, true)}) then");
+				proc.CodeLines.Add("			-- Address does not fall on a register boundary so flag an error on the bus.");
+				proc.CodeLines.Add("			next_bresp <= C_SLVERR;");
+				proc.CodeLines.Add($"		elsif({AddressWidthAttributeName} > {MinAddressWidth} and unsigned({GetName(Signal.AWADDR)}({AddressWidthAttributeName}-1 downto {MinAddressWidth})) /= 0) then");
+			}
+			else
+			{
+				proc.CodeLines.Add($"		if({AddressWidthAttributeName} > {MinAddressWidth} and unsigned({GetName(Signal.AWADDR)}({AddressWidthAttributeName}-1 downto {MinAddressWidth})) /= 0) then");
+			}
 			proc.CodeLines.Add("			-- The address is outside of the valid register space so flag an error on the bus.");
-			proc.CodeLines.Add("			next_rresp <= SLVERR;");
+			proc.CodeLines.Add("			next_rresp <= C_SLVERR;");
 			proc.CodeLines.Add("		else");
 
 			Tuple<ulong, int>[] blocks = AddressibleItemCollection.GetSimplifiedBlocks(Access.Write, Notifications, Memories, Registers);
@@ -876,17 +922,17 @@ namespace VHDLCodeGen.ARM.AXI.Slave
 						string endAddress = VHDLUtility.GetBitString(block.Item1 + (ulong)block.Item2 - 1, addr + 1, true, AddressLSB);
 						proc.CodeLines.Add($"{start}({GetName(Signal.AWADDR)}({addr} downto {AddressLSB}) >= {startAddress} and {GetName(Signal.AWADDR)}({addr} downto {AddressLSB}) <= {endAddress}) then");
 					}
-					proc.CodeLines.Add($"				next_bresp <= OKAY;");
+					proc.CodeLines.Add($"				next_bresp <= C_OKAY;");
 				}
 				proc.CodeLines.Add("			else");
 				proc.CodeLines.Add("				-- Nothing writeable at this location so flag an error on the bus.");
-				proc.CodeLines.Add("				next_bresp <= SLVERR;");
+				proc.CodeLines.Add("				next_bresp <= C_SLVERR;");
 				proc.CodeLines.Add("			end if;");
 			}
 			else
 			{
 				// Only a single register in the memory space so set response directly without any checks.
-				proc.CodeLines.Add("			next_bresp <= OKAY;");
+				proc.CodeLines.Add("			next_bresp <= C_OKAY;");
 			}
 			proc.CodeLines.Add("		end if;");
 			proc.CodeLines.Add("	end if;");
